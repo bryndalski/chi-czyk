@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Kavivanar&display=swap');
+
+body {
+    height: 100vh;
+    overflow: hidden !important;
+    scroll-behavior: smooth;
+    background-image: url('../images/chineceDarkDragon.png');
+    background-size: 100% 100%;
+    background-position: auto;
+    background-repeat: no-repeat;
+    background-color: rgb(127.5, 127.5, 127.5);
+
+    * {
+        font-family: 'Kavivanar', cursive;
+    }
+}
+
+.loginContainer {
+    background: rgba(46, 46, 46, 0.767);
+    width: 90%;
+    display: inline-block;
+    margin: 0 auto;
+    border: solid 3px rgba(127.5, 127.5, 127.5);
+    border-radius: 10px;
+
+    div {
+        padding: 2%;
+    }
+
+    input {
+        background-color: rgba(128, 128, 128, 0);
+        color: white;
+        text-align: center;
+    }
+
+    input:focus {
+        color: black !important;
+    }
+
+    button {
+        border: solid 3px rgba(127.5, 127.5, 127.5);
+
+    }
+}
+
+.colors {
+    align-items: baseline;
+
+    div {
+        display: flex;
+        flex-direction: row;
+
+        span {
+            margin: 5px;
+            color: white;
+        }
+    }
+}
