@@ -8,17 +8,13 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
 
 
     app.get('/test', (req, res) => {
-        res.json({
-            status: "Sucess",
-            test: "Compleated",
-            redirest: true
-        })
+        res.sendFile(path.join(dirname + "/static/pages/waitingRoom.html"))
     })
 
     //*POST SECTION
 
     app.post('/askForRoom', function (req, res) {
-        let beczka = new user.NewUser(req.body, pokojeAktualne)
+        let beczka = new user.NewUser(req.body, pokojeAktualne, res)
     })
 
 }

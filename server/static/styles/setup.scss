@@ -8,7 +8,6 @@ body {
     background-size: 100% 100%;
     background-position: auto;
     background-repeat: no-repeat;
-    background-color: rgb(127.5, 127.5, 127.5);
 
     * {
         font-family: 'Kavivanar', cursive;
@@ -55,4 +54,9 @@ body {
             color: white;
         }
     }
+}
+
+span {
+    display: inline-block;
+    text-align: center;
 }

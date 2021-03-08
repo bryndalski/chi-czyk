@@ -6,48 +6,65 @@ import {
 
 export class serverOperation {
     constructor(contentType, data, adress, errorMessage, ) {
+        this.response = null
         this.data = data || null
         this.errorMessage = errorMessage || "niestey z przyczyn niewyjaśnionych serwer się zepsuł i nie działa"
         this.adress = adress
         this.contentType = contentType || config.contentTypes.json
 
     }
-    //getters
-    get fetchData() {
-        this.data = null
-        let serverRequest = new XMLHttpRequest();
-        serverRequest.onreadystatechange = () => {
-            if (serverRequest.status === 200) {
-                console.log("SEND SUCESS" + JSON.parse(serverRequest.response))
-                return JSON.parse(serverRequest.response)
-            } else
-                return {
-                    status: "error",
-                    message: this.errorMessage
-                }
-        }
-        serverRequest.open("GET", this.adress, false)
-        serverRequest.send(this.data)
+    //methods
+    async fetchData() {
+        let fetchData = await new Promise((success, fail) => {
+            this.data = null
+            fetch(this.adress, {
+                    method: 'GET',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("recived GET")
+                    console.log(JSON.parse(data))
+                    seccess(JSON.parse(data))
+                })
+                .catch((error) => {
+                    return {
+                        status: "error",
+                        message: this.errorMessage
+                    }
+                });
+        })
+        return fetchData
     }
 
-    get sendData() {
+    async sendData() {
         if (this.data == "" || this.data == null) throw "DATA CAN NOT BE NULL "
-        let serverRequest = new XMLHttpRequest();
-        serverRequest.open("POST", this.adress, true)
-        serverRequest.setRequestHeader("Content-Type", this.contentType);
-        console.log(this.adress)
-        serverRequest.onreadystatechange = () => {
-            if (serverRequest.status === 200 && serverRequest.readyState === XMLHttpRequest.DONE) {
-                console.log("SEND SUCESS" + JSON.parse(serverRequest.response))
-                return JSON.parse(serverRequest.response)
-            } else
-                return {
-                    status: "error",
-                    message: this.errorMessage
-                }
-        }
-        console.log(this.data)
-        serverRequest.send(JSON.stringify(this.data))
+        let fetchData = await new Promise((success, fail) => {
+
+            fetch(this.adress, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': this.contentType
+                    },
+                    body: JSON.stringify(this.data),
+                })
+                .then(response => response.json())
+                .then(async data => {
+                    this.response = data
+                    console.log(this.response)
+                    success(data)
+                })
+                .catch((error) => {
+                    return {
+                        status: "error",
+                        message: this.errorMessage
+                    }
+                });
+        })
+        return fetchData
+    }
+
+    get getRespond() {
+        return this.response
     }
 
     //methods
@@ -57,6 +74,7 @@ export class serverOperation {
         this.errorMessage = errorMessage || this.errorMessage
         this.adress = adress || this.adress
     }
+
 
 
 }

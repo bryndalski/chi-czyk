@@ -23,7 +23,7 @@ function mixer() {
     return rangeArray
 }
 
-function enterGame() {
+async function enterGame() {
     let valuesArray = Array.from(document.querySelectorAll('input'))
     let valesObject = valuesArray.map(element => {
         if (element.value === "")
@@ -31,13 +31,21 @@ function enterGame() {
         else
             return element.value
     })
-    valesObject = valesObject.map((element, count) => {
-        return {
-            [inputValues[count]]: element
-        }
+    let userData = {}
+    valesObject.forEach((element, count) => {
+        userData[inputValues[count]] = element
     })
-    console.log(valesObject)
-    let serverRequest = new serverOperation(null, valesObject, config.ask_for_room, "BŁĄÐ ZAPYTANIA O POKÓJ") //TODO zmień mnie 
-    serverRequest.sendData
+    let serverRequest = new serverOperation(null, userData, config.ask_for_room, "BŁĄÐ ZAPYTANIA O POKÓJ") //TODO zmień mnie 
+    let respond = await serverRequest.sendData()
+    await respondHandler(await respond)
+}
+
+function respondHandler(respond) {
+    if (respond.success) {
+        window.location.href("/kutas")
+    } else {
+        console.log(document.querySelector('span'))
+        document.querySelector('span').innerHTML = respond.message
+    }
 
 }
