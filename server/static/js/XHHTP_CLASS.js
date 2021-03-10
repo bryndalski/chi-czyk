@@ -22,9 +22,8 @@ export class serverOperation {
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log("recived GET")
-                    console.log(JSON.parse(data))
-                    seccess(JSON.parse(data))
+                    // console.log("recived GET", data)
+                    success(data)
                 })
                 .catch((error) => {
                     return {

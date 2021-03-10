@@ -1,6 +1,7 @@
 const dbSchema = require('../config/db_schema.json')
 class NewUser {
-    constructor(user, database, res) {
+    constructor(user, database, res, req) {
+        this.req = req
         this.res = res
         this.user = user
         this.database = database
@@ -10,15 +11,25 @@ class NewUser {
     async INIT() {
         const room = await this.findRoom()
         if (await room === null) {
-            this.newRoom().then(value => this.addUserToRoom(value))
+            this.newRoom().then(value => {
+                this.addUserToRoom(value)
+                this.req.session.database = value
+                this.req.session.whoAmI = this.user
+                this.res.json({
+                    success: true,
+                    redirect: true,
+                })
+            })
         } else {
             const uniqResponse = await this.uniqueCheck(room) || true
             console.log(await uniqResponse)
             if (uniqResponse.success) {
                 this.addUserToRoom(room)
+                this.req.session.database = room
+                this.req.session.whoAmI = this.user
                 this.res.json({
                     success: true,
-                    redirect: true
+                    redirect: true,
                 })
             } else this.res.json(uniqResponse)
         }
@@ -58,8 +69,11 @@ class NewUser {
             Lets Play A game :)
             `
         }
-        else return {
-            success: true
+        else {
+            return {
+                success: true,
+                roomId: room._id
+            }
         }
     }
 

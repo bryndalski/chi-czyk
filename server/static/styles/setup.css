@@ -17,6 +17,7 @@ body * {
   width: 90%;
   display: inline-block;
   margin: 0 auto;
+  max-width: 750px;
   border: solid 3px gray;
   border-radius: 10px;
 }

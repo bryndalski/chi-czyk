@@ -1,0 +1,4 @@
+'use stric'
+const game = {
+
+}

@@ -25,26 +25,37 @@ function mixer() {
 
 async function enterGame() {
     let valuesArray = Array.from(document.querySelectorAll('input'))
-    let valesObject = valuesArray.map(element => {
-        if (element.value === "")
-            throw ("Podany został pusty nick ")
-        else
-            return element.value
-    })
     let userData = {}
-    valesObject.forEach((element, count) => {
-        userData[inputValues[count]] = element
-    })
-    let serverRequest = new serverOperation(null, userData, config.ask_for_room, "BŁĄÐ ZAPYTANIA O POKÓJ") //TODO zmień mnie 
-    let respond = await serverRequest.sendData()
-    await respondHandler(await respond)
+    let shallBeSent = true
+    try {
+        valuesArray.forEach((element, count) => {
+            if (element.value === "")
+                throw alert("Podany został pusty nick ")
+            else {
+                if (element.value.toString().startsWith("eval")) {
+                    shallBeSent = false
+                    throw alert("NOSZ KURDE NIE ŁADNIE ")
+                }
+                userData[inputValues[count]] = element.value
+                element.value
+            }
+        })
+    } catch (err) {}
+    console.log(userData)
+    if (shallBeSent) {
+        let serverRequest = new serverOperation(null, userData, config.ask_for_room, "BŁĄÐ ZAPYTANIA O POKÓJ") //TODO zmień mnie 
+        let respond = await serverRequest.sendData()
+        await respondHandler(await respond)
+    }
 }
 
+
 function respondHandler(respond) {
-    if (respond.success) {
-        window.location.href("/kutas")
+    console.log(respond)
+    if (respond.redirect) {
+        window.localStorage.setItem("roomId", respond.roomId)
+        window.location.href = "/poczekalnia"
     } else {
-        console.log(document.querySelector('span'))
         document.querySelector('span').innerHTML = respond.message
     }
 
