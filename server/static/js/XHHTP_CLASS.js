@@ -38,7 +38,6 @@ export class serverOperation {
     async sendData() {
         if (this.data == "" || this.data == null) throw "DATA CAN NOT BE NULL "
         let fetchData = await new Promise((success, fail) => {
-
             fetch(this.adress, {
                     method: 'POST',
                     headers: {

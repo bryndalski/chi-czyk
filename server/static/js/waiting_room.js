@@ -1,3 +1,4 @@
+'use strict'
 import {
     serverOperation
 }
@@ -11,12 +12,15 @@ const newRoom = {
     userNumber: 0,
     roomId: window.localStorage.getItem("roomId") || null,
     relationInputNickname: {},
-    iWantToPlay(e) {
+    async iWantToPlay(e) {
         console.log(e.target.checked);
+        e.target.disabled = true
         new serverOperation(null, {
             change: e.target.checked
-        }, config.changePlay, null).sendData()
-
+        }, config.changePlay, null).sendData().then((val) => {
+            console.log(val);
+            e.target.disabled = false
+        })
     },
     createUser(user, whoAmI, whoWantsToPlay) {
         let userTemplate = document.querySelector('template').cloneNode(true)
@@ -56,18 +60,36 @@ const newRoom = {
             //sprawdzam kto chce grać 
             if (await respond.whoWantsToPlay != []) //bez sensu mielić pętle jak nikt nie chce grać
                 Object.keys(this.relationInputNickname).forEach((element, counter) => {
-                    if (respond.whoWantsToPlay[counter] !== undefined)
-                        this.relationInputNickname[element].wantsToPlay = (respond.whoWantsToPlay[counter] !== undefined && respond.whoWantsToPlay[counter].includes(element)) ? true : false //obie obdpowiedzi takie same jeśli gra to gra a jeśli element != temu to  nie gra proste szybkie 
-                    this.relationInputNickname[element].input.checked = (respond.whoWantsToPlay[counter] !== undefined && respond.whoWantsToPlay[counter].includes(element)) ? true : false
+                    this.relationInputNickname[element].wantsToPlay = (respond.whoWantsToPlay.includes(element)) ? true : false //obie obdpowiedzi takie same jeśli gra to gra a jeśli element != temu to  nie gra proste szybkie 
+                    this.relationInputNickname[element].input.checked = (respond.whoWantsToPlay.includes(element)) ? true : false
                 })
-            success(await respond)
+            if (respond.whoWantsToPlay.length >= 2)
+                newRoom.finalCountdown()
+            else
+                success(await respond)
         })
         return findMe
+    },
+
+    finalCountdown() {
+        let container = document.querySelector('.pudelko')
+        container.classList.add("bigTekscior")
+        let counter = 10
+        container.innerHTML = counter
+        let cdnInterval = setInterval(() => {
+            counter--
+            container.innerHTML = counter
+            console.log(counter);
+            if (counter < 0) {
+                clearInterval(cdnInterval)
+                window.location.href = "/chinaGameplay"
+            }
+        }, 1000)
     },
     startFetching() {
         newRoom.fetchUsers().then(v => setTimeout(() => {
             this.startFetching()
-        }, 5000))
+        }, 3000))
     }
 }
 

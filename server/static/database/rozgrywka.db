@@ -1,2 +1,1 @@
-{"roomOccupants":2,"players":[{"nickname":"DZIAŁAŃ","R":"128","G":"0.5","B":"127.5","id":1},{"nickname":"KURWA","R":"250","G":"127.5","B":"127.5","id":2}],"moves":[],"scores":{},"whoWantsToPlay":[],"_id":"fxVjgf2lO08RVjET"}
-{"roomOccupants":2,"players":[{"nickname":"DZIAŁAŃ","R":"128","G":"0.5","B":"127.5","id":1},{"nickname":"KURWA","R":"250","G":"127.5","B":"127.5","id":2}],"moves":[],"scores":{},"whoWantsToPlay":["KURWA"],"_id":"fxVjgf2lO08RVjET"}
+{"roomOccupants":3,"players":[{"nickname":"P3asjansPajonk2","R":"169","G":"5.5","B":"127.5","id":1},{"nickname":"33","R":"208","G":"127.5","B":"127.5","id":2},{"nickname":"332","R":"208","G":"78.5","B":"127.5","id":3}],"moves":[],"scores":{},"whoWantsToPlay":["33","P3asjansPajonk2"],"_id":"xErh7xSHk3bxiPYI"}
