@@ -23,6 +23,10 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
         })
     })
 
+    app.get("/mainGame", (req, res) => {
+        res.sendFile(path.join(dirname, "/static/pages/game.html"))
+
+    })
     //*POST SECTION
 
     app.post('/askForRoom', function (req, res) {

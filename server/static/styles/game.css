@@ -1,0 +1,10 @@
+canvas {
+  border: solid 1px black;
+}
+
+.cnvContainer {
+  width: 80vw;
+  height: 80vw;
+  max-width: 1100px;
+  max-height: 1100px;
+}
