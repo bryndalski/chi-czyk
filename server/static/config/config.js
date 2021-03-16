@@ -4,6 +4,7 @@ export let config = {
     "ask_for_room": "/askForRoom",
     "fetchWaitingRoom": "/nowiLudzie",
     "changePlay": "/zmianaNastawienia",
+    "getUsers": "/GetUsers",
     "contentTypes": {
         "json": "application/json"
     },

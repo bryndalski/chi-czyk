@@ -63,7 +63,7 @@ const newRoom = {
                     this.relationInputNickname[element].wantsToPlay = (respond.whoWantsToPlay.includes(element)) ? true : false //obie obdpowiedzi takie same jeśli gra to gra a jeśli element != temu to  nie gra proste szybkie 
                     this.relationInputNickname[element].input.checked = (respond.whoWantsToPlay.includes(element)) ? true : false
                 })
-            if (respond.whoWantsToPlay.length >= 2)
+            if (respond.whoWantsToPlay.length >= 2 || this.userArray.length == 4)
                 newRoom.finalCountdown()
             else
                 success(await respond)
@@ -72,6 +72,7 @@ const newRoom = {
     },
 
     finalCountdown() {
+
         let container = document.querySelector('.pudelko')
         container.classList.add("bigTekscior")
         let counter = 10

@@ -13,6 +13,7 @@ class NewUser {
         if (await room === null) {
             this.newRoom().then(value => {
                 this.addUserToRoom(value)
+                this.req.session.waiting = true
                 this.req.session.database = value
                 this.req.session.whoAmI = this.user
                 this.res.json({
@@ -25,6 +26,7 @@ class NewUser {
             console.log(await uniqResponse)
             if (uniqResponse.success) {
                 this.addUserToRoom(room)
+                this.req.session.waiting = true
                 this.req.session.database = room
                 this.req.session.whoAmI = this.user
                 this.res.json({
