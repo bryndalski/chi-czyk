@@ -25,12 +25,13 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
     app.get("/chinaGameplay", (req, res) => {
         if (req.session.database == undefined)
             res.redirect('/')
-        else
-        if (req.session.waiting)
-            res.redirect("/poczekalnia")
-        else
-            res.sendFile(path.join(dirname, "/static/pages/game.html"))
-
+        else {
+            if (req.session.database.roomOccupants == 4) req.session.waiting = false
+            if (req.session.waiting)
+                res.redirect("/poczekalnia")
+            else
+                res.sendFile(path.join(dirname, "/static/pages/game.html"))
+        }
     })
     app.get('/GetUsers', (req, res) => {
         if (req.session)

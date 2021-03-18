@@ -19,6 +19,7 @@ const gamePRCT = [
     [22, 40],
     [31, 40],
     [40, 40],
+    //
     [40, 32],
     [40, 23],
     [40, 14],
@@ -55,7 +56,6 @@ const gamePRCT = [
     [22, 60],
     [31, 60],
     [40, 60],
-
 ]
 
 const domki = [ //te śmieszne na środku
@@ -89,6 +89,34 @@ const domki = [ //te śmieszne na środku
     ]
 ]
 
+const bazy = [
+    [
+        [5, 5],
+        [5, 14],
+        [13, 5],
+        [13, 14]
+    ],
+    [
+        [85, 5],
+        [85, 14],
+        [93, 5],
+        [93, 14]
+    ],
+    [
+        [95, 95],
+        [95, 87],
+        [87, 95],
+        [87, 87]
+    ],
+    [
+        [5, 95],
+        [5, 87],
+        [13, 95],
+        [13, 87]
+    ],
+
+]
+
 const createGameBord = {
     canvasElement: null,
     canvasContext: null,
@@ -110,9 +138,10 @@ const createGameBord = {
         this.canvasElement.height = this.canvasSize.height
         this.canvasContext.scale(1, 1) //skaluje
         this.drawGamePath()
-        gamePRCT.forEach(elem => this.drawFiled(this.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), 'aqua', "black"))
+        gamePRCT.forEach(elem => this.drawFiled(this.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), 'rgb(0,0,0,0.3)', "rgb(0,0,0,0.3)"))
         this.drawHomes()
         this.drawBasicPositons()
+        this.drawHugeHomes()
     },
 
     drawCircle(x, y, srednica, color, text) {
@@ -130,7 +159,7 @@ const createGameBord = {
         this.canvasContext.beginPath()
         this.canvasContext.arc(x, y, srednica, 0, 2 * Math.PI)
         this.canvasContext.stroke()
-        let gradient = this.canvasContext.createRadialGradient(x, y, srednica / 4, x, y, srednica);
+        let gradient = this.canvasContext.createRadialGradient(x, y, srednica / 15, x, y, srednica);
         gradient.addColorStop(0, incolor);
         gradient.addColorStop(1, outcolor);
         this.canvasContext.fillStyle = gradient
@@ -156,7 +185,7 @@ const createGameBord = {
     drawHomes() {
         domki.forEach((el, cnt) => {
             if (this.userArray[cnt])
-                el.forEach(elem => createGameBord.drawCircle(createGameBord.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), `rgb(${this.userArray[cnt].R},${this.userArray[cnt].G},${this.userArray[cnt].B})`))
+                el.forEach(elem => createGameBord.drawCircle(createGameBord.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), `rgb(${this.userArray[cnt].R},${this.userArray[cnt].G},${this.userArray[cnt].B},0.2)`))
             else
                 el.forEach(elem => this.drawFiled(this.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), "red", "black"))
         })
@@ -164,13 +193,19 @@ const createGameBord = {
     drawBasicPositons() {
         pozycjePodstawowe.forEach((elem, cnt) => {
             if (this.userArray[cnt])
-                createGameBord.drawCircle(createGameBord.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), `rgb(${this.userArray[cnt].R},${this.userArray[cnt].G},${this.userArray[cnt].B})`)
+                createGameBord.drawFiled(createGameBord.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), `rgb(${this.userArray[cnt].R},${this.userArray[cnt].G},${this.userArray[cnt].B},1.5)`, "rgb(51,51,51)")
             else
-                this.drawFiled(this.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), "red", "black")
+                this.drawFiled(this.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), "red", "rgb(0,0,0,0.5)")
         })
+
     },
     drawHugeHomes() {
-
-        
+        bazy.forEach((elem1, counter) => elem1.forEach(elem => {
+            console.log(elem);
+            if (this.userArray[counter])
+                createGameBord.drawCircle(createGameBord.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), `rgb(${this.userArray[counter].R},${this.userArray[counter].G},${this.userArray[counter].B})`)
+            else
+                this.drawFiled(this.canvasSize.height * (elem[0] / 100), this.canvasSize.height * (elem[1] / 100), this.canvasSize.height * (3 / 100), "red", "black")
+        }))
     }
 }

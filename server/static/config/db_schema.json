@@ -3,5 +3,6 @@
     "players": [],
     "moves": [],
     "scores": {},
-    "whoWantsToPlay": []
+    "whoWantsToPlay": [],
+    "syncTime": 0
 }
