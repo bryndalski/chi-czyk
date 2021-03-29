@@ -136,5 +136,34 @@ canvas {
         text-overflow: ellipsis;
         white-space: wrap;
         color: white;
+
     }
+
+    span {
+        visibility: hidden;
+
+    }
+
+
+
+    button {
+        background-color: rgba(255, 255, 255, 0);
+        color: white;
+        bottom: solid;
+        border-style: solid;
+        border-width: 5px;
+        padding: 10px;
+        border-radius: 5px;
+        visibility: hidden;
+        transition: all 0.5s ease-in-out;
+    }
+
+    button:hover {
+        background-color: green;
+    }
+}
+
+.diceContainer {
+    width: 90%;
+    height: 90%;
 }

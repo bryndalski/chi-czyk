@@ -29,9 +29,10 @@ async function enterGame() {
     let shallBeSent = true
     try {
         valuesArray.forEach((element, count) => {
-            if (element.value === "")
+            if (element.value === "") {
+                shallBeSent = false
                 throw alert("Podany został pusty nick ")
-            else {
+            } else {
                 if (element.value.toString().startsWith("eval")) {
                     shallBeSent = false
                     throw alert("NOSZ KURDE NIE ŁADNIE ")

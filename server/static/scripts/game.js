@@ -1,4 +1,0 @@
-'use stric'
-const game = {
-
-}

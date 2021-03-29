@@ -1,9 +1,10 @@
 const user = require('./addToRoom')
 const whoWantsToPlay = require('./whoWantsToPlay')
+const newUser = require('./newUser')
+const player = require("./gamePlay")
 module.exports = function (app, path, dirname, pokojeAktualne) {
     //* ROUTE section
     app.get('/', (req, res) => {
-        console.log(req.session.database);
         if (req.session.database == undefined)
             res.sendFile(path.join(dirname + "/static/pages/setUp.html"))
         else
@@ -33,45 +34,49 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
                 res.sendFile(path.join(dirname, "/static/pages/game.html"))
         }
     })
-    app.get('/GetUsers', (req, res) => {
-        if (req.session)
-            pokojeAktualne.findOne({
-                _id: req.session.database._id
-            }, function (error, document) {
-                req.session.database = document
-                res.json({
-                    players: [...document.players],
-                    whoAmI: req.session.whoAmI,
-                })
-            })
 
+    app.get('/getUsers', (req, res) => {
+        res.json({
+            whoAmI: req.session.whoAmI,
+            players: req.session.database.players
+        })
+    })
+    app.get('/getBord', (req, res) => {
+        let toSend = player.createBasicBord(req, res, pokojeAktualne)
+        res.json(toSend)
     })
 
-
+    app.get('/pawnPosition', (req, res) => { //w zależności od sytuacji jeśli gra została zainicjowana odsyła albo czyste położenie początkowe albo
+        console.log("pobieram pionki", req.session.pawnPosition)
+        req.session.incoming = new Date().getTime()
+        if (req.session.database) {
+            if (!req.session.pawnPosition) {
+                player.handleUserInit(req, pokojeAktualne)
+                setInterval(() => {
+                    player.tourMenager(req, pokojeAktualne)
+                }, 1000);
+                res.json(req.session.pawnPosition) //położenie aktualne pionków 
+            } else {
+                res.json(req.session.pawnPosition) //położenie aktualne pionków 
+            }
+        } else
+            res.redirect("/")
+    })
 
     app.get('/nowiLudzie', (req, res) => {
-        pokojeAktualne.findOne({
-            _id: req.session.database._id
-        }, function (error, document) {
-            req.session.database = document
-            if (req.session.database.whoWantsToPlay.length >= 2) {
-                req.session.waiting = false
-                pokojeAktualne.update({
-                    _id: req.session.database._id
-                }, {
-                    $set: {
-                        roomOccupants: 4 //          Blokowanie pokoju gdy 2 osoby chca grać pokój przestaje być dostępny 
-                    }
-                }, {
-                    multi: true
-                }, function (err, numReplaced) {});;
-            }
-            res.json({
-                players: [...document.players],
-                whoAmI: req.session.whoAmI,
-                whoWantsToPlay: req.session.database.whoWantsToPlay
-            })
-        })
+        newUser(req, res, pokojeAktualne)
+    })
+
+    app.get("/gameSynch", (req, res) => {
+        if (req.session.database)
+            player.handelGame(req, res, pokojeAktualne)
+        else
+            res.redirect("/")
+    })
+    //kosteczka
+    app.get('/throwDice', (req, res) => {
+        player.throwDice(req, pokojeAktualne)
+        res.status(200)
     })
 
 
@@ -84,7 +89,6 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
     app.post('/zmianaNastawienia', function (req, res) {
         whoWantsToPlay.wantToPlay(req, res, pokojeAktualne)
     })
-
 
 
 

@@ -4,5 +4,13 @@
     "moves": [],
     "scores": {},
     "whoWantsToPlay": [],
-    "syncTime": 0
+    "pawnPositions": {},
+    "syncTime": 0,
+    "synchRequired": false,
+    "countDownInit": true,
+    "dice": null,
+    "gamer": 0,
+    "remainingTime": null
+
+
 }

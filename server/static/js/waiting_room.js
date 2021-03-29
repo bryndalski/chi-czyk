@@ -64,28 +64,20 @@ const newRoom = {
                     this.relationInputNickname[element].input.checked = (respond.whoWantsToPlay.includes(element)) ? true : false
                 })
             if (respond.whoWantsToPlay.length >= 2 || this.userArray.length == 4)
-                newRoom.finalCountdown()
+                newRoom.sychAndStart(await respond)
             else
                 success(await respond)
         })
         return findMe
     },
 
-    finalCountdown() {
-
-        let container = document.querySelector('.pudelko')
-        container.classList.add("bigTekscior")
-        let counter = 10
-        container.innerHTML = counter
-        let cdnInterval = setInterval(() => {
-            counter--
-            container.innerHTML = counter
-            console.log(counter);
-            if (counter < 0) {
-                clearInterval(cdnInterval)
-                window.location.href = "/chinaGameplay"
-            }
-        }, 1000)
+    sychAndStart(respond) {
+        console.log("synchronizuję");
+        console.log(respond.synchTime);
+        let timeoutCount = respond.synchTime - new Date().getTime()
+        setTimeout(() => {
+            window.location.href = "/chinaGameplay"
+        }, timeoutCount);
     },
     startFetching() {
         newRoom.fetchUsers().then(v => setTimeout(() => {

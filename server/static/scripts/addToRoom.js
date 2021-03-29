@@ -23,7 +23,6 @@ class NewUser {
             })
         } else {
             const uniqResponse = await this.uniqueCheck(room) || true
-            console.log(await uniqResponse)
             if (uniqResponse.success) {
                 this.addUserToRoom(room)
                 this.req.session.waiting = true

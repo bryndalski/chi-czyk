@@ -1,5 +1,4 @@
 function wantToPlay(req, res, pokojeAktualne) {
-    console.log(req.body.change);
     if (!req.body.change) {
         pokojeAktualne.update({
             _id: req.session.database._id
@@ -8,7 +7,7 @@ function wantToPlay(req, res, pokojeAktualne) {
                 whoWantsToPlay: req.session.whoAmI.nickname
             }
         }, {}, function (data) {
-            console.log(data);
+            // console.log(data);           //TODO czy potrzebne
         });
     } else {
         pokojeAktualne.update({
@@ -18,14 +17,13 @@ function wantToPlay(req, res, pokojeAktualne) {
                 whoWantsToPlay: req.session.whoAmI.nickname
             }
         }, {}, function (er, data) {
-            console.log(data);
+            // console.log(data);       //TODO czy pootrzebne 
         });
     }
     pokojeAktualne.persistence.compactDatafile() //czyści DB 
     pokojeAktualne.findOne({
         _id: req.session.database._id
     }, function (er, data) {
-        console.log(data)
         req.session.database = data
         res.json({})
     })
