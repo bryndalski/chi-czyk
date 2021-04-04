@@ -25,17 +25,13 @@ class Dice {
     if (value != null) {
       this.diceContainer.src = `/images/dice-${value}.svg`;
       if (this.letMeTalk) {
-        console.log(value);
-        try {
-          let utterance = new SpeechSynthesisUtterance(
-            `Kostka została wylosowana. Liczba oczek wynosi ${value}`
-          );
-          this.letMeTalk = false;
-          utterance.lang = "pl-PL";
-          this.syntezatorek.speak(utterance);
-        } catch (er) {
-          console.log(er);
-        }
+        //TODO odkomentuj
+        // let utterance = new SpeechSynthesisUtterance(
+        //   `Kostka została wylosowana. Liczba oczek wynosi ${value}`
+        // );
+        // this.letMeTalk = false;
+        // utterance.lang = "pl-PL";
+        // this.syntezatorek.speak(utterance);
       }
     } else this.clearDice();
   }

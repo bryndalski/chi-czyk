@@ -35,6 +35,9 @@ const userInGameOperations = {
   whoAmI: null, //informacja kim jestem
   kosteczka: null, // zawiera informacje o wylosowanych z póli kostkach
   myPawns: [], // przechowywuje informacje o wszystkich pionkach
+  lastPlace: [], // przechowuje ostatnie miejsce i nie wymusz rerenderowania jeśli nie doszło do zminy
+  lastDice: null, // ostania kostka
+  lastPLayer: null,
   //tworzneie karty użytkownika
   createUser(user) {
     let userTemplate = document.querySelector("template").cloneNode(true);
@@ -62,8 +65,15 @@ const userInGameOperations = {
     //pobiera pozycje pionków
     let statusik = new serverOperation(null, null, config.getPawns);
     statusik.fetchData().then((v) => {
-      createGameBord.pawns = v;
-      createGameBord.resize();
+      if (
+        this.lastPlace == [] ||
+        JSON.stringify(this.lastPlace) != JSON.stringify(v)
+      ) {
+        console.log("RERENDERUJE");
+        this.lastPlace = v;
+        createGameBord.pawns = v;
+        createGameBord.resize();
+      }
     });
   },
   //zarządzanie ruchem
@@ -72,13 +82,32 @@ const userInGameOperations = {
     let synch = new serverOperation(null, null, config.gameSynch, null);
     synch.fetchData().then((v) => {
       //odpalam kostki
-      this.playerOperationArray.forEach((index) => {
-        index.enebleDice(
-          this.playerOperationArray[v.movePlayer].getNick,
-          v.dice
-        );
-      });
-      this.kosteczka.setDice(v.dice);
+      //nie robię tego w kółko
+      if (this.lastDice != v.dice || this.lastPLayer != v.movePlayer) {
+        // nie renderuje tego w nieskończoność -> odpowiednik watch w vue
+        //dodaje gracza w przypadku kolejki gdzie nie został wykonany ruch
+        this.lastDice = v.dice;
+        this.lastPLayer = v.movePlayer;
+        this.kosteczka.setDice(v.dice); // kostreczka wylosowana i odpalona
+        this.playerOperationArray.forEach((index) => {
+          index.enebleDice(
+            this.playerOperationArray[v.movePlayer].getNick,
+            v.dice
+          );
+          index.disablePawns();
+          if (v.dice != null) {
+            index.enablePawns(
+              this.playerOperationArray[v.movePlayer].getNick,
+              v.dice
+            );
+          } // jeśli kostka została już wylosowana
+          else {
+            // index.clearMove();
+          }
+        });
+        this.createPawns();
+      } else {
+      }
       //obliczam czas do nastepnego zapytania
       this.playerOperationArray[v.movePlayer].setTime(v.remainingTime);
       let nextRequest = v.reqSendTime + 2000 - new Date().getTime(); //TODO zmień na 1000 a nawet na 500 => mniej szybciej synchronizuje
@@ -88,13 +117,18 @@ const userInGameOperations = {
         userInGameOperations.synchGame();
       }, nextRequest);
     });
-    this.createPawns();
+    if (this.lastPlace == []) this.lastPlace;
   },
   //przypisywanie pionków do użytkowników
   assignNewPawns(pawnsArray) {
-    this.playerOperationArray.forEach((index) => {
-      let wyniki = pawnsArray.map((item) => item.getOwner == index.getNick);
-      console.log(wyniki);
+    this.playerOperationArray.forEach((index, c) => {
+      let wyniki = [];
+      pawnsArray.forEach((item, counter) => {
+        if (item.getOwner == index.getNick) {
+          wyniki.push(item);
+        }
+      });
+      index.newPawns(wyniki);
     });
   },
 };

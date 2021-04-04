@@ -120,9 +120,9 @@ module.exports = {
         let response = v;
         if (response.remainingTime <= 0) {
           response.remainingTime = 60000;
-          response.gamer = response.gamer + 1;
-          if (response.players.length == response.gamer) {
-            response.gamer = 0;
+          response.player = response.player + 1;
+          if (response.players.length == response.player) {
+            response.player = 0;
           }
           //resetuje kostkę jako NULL
           this.setDice(null, req, database);
@@ -137,7 +137,7 @@ module.exports = {
           {
             $set: {
               remainingTime: response.remainingTime,
-              gamer: response.gamer,
+              player: response.player,
             },
           },
           {}, // this argument was missing

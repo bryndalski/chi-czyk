@@ -39,7 +39,6 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
 
   app.get("/pawnPosition", (req, res) => {
     //w zależności od sytuacji jeśli gra została zainicjowana odsyła albo czyste położenie początkowe albo
-    console.log("pobieram pionki", req.session.pawnPosition);
     req.session.incoming = new Date().getTime();
     if (req.session.database) {
       if (!req.session.firstInit) {

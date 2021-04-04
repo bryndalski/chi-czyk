@@ -61,6 +61,8 @@ const createGameBord = {
   },
   //* rysuje pola aktywne
   drawActiveFileds() {
+    this.assignedPawns = [];
+    this.gamePathArray = [];
     sciezkaGry.forEach((index, counter) => {
       this.gamePathArray.push(
         new Field(
@@ -78,7 +80,6 @@ const createGameBord = {
       );
     });
     this.pawns.forEach((index, counter) => {
-      console.log(index);
       let zmienia = false;
       this.gamePathArray.forEach((elem) => {
         if (elem.getX == index.x && elem.getY == index.y) {
@@ -89,10 +90,9 @@ const createGameBord = {
         elem.changeToPawn(index.color, index.owner, Math.floor(counter / 4)); // pionki są zawsze wielokrotnością 4
         this.assignedPawns.push(elem);
       } else {
-        console.log("XD");
         let independendPawn = new Field(
-          index[0],
-          index[1],
+          index.x,
+          index.y,
           this.drawFiled(
             this.canvasSize.height * (index.x / 100), //TODO zmień na x
             this.canvasSize.height * (index.y / 100), //TODO zmień na y
@@ -109,6 +109,10 @@ const createGameBord = {
         );
         this.assignedPawns.push(independendPawn);
       }
+    });
+    //*dodaje każdemu pionkowi informacje o innych ponieważ pracuje tylko na pionkach i fomruje bazy
+    this.assignedPawns.forEach((index, counter) => {
+      index.setOutherFilds(this.gamePathArray);
     });
   },
   //*rysuje nie aktywne pola, które nie mają ingerencji z użytkownikiem => pola w rogach planszy + na samym środku
