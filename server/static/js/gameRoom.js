@@ -1,171 +1,214 @@
-'use strict'
-export {
-
-    createGameBord
-}
-
-// export const pozycjePodstawowe = [
-//     [5, 40], // 9
-//     [60, 5], // 12
-//     [95, 60], //3
-//     [40, 95], // 6
-// ]
-
-// const gamePRCT = [
-//     [5, 60],
-//     [5, 50],
-//     [13, 40],
-//     [22, 40],
-//     [31, 40],
-//     [40, 40],
-//     //
-//     [40, 32],
-//     [40, 23],
-//     [40, 14],
-//     [40, 5],
-//     [50, 5],
-//     // 14 23 32 40
-//     [60, 14],
-//     [60, 23],
-//     [60, 32],
-//     [60, 40],
-//     // 
-//     [69, 40],
-//     [78, 40],
-//     [86, 40],
-//     [95, 40],
-//     [95, 50],
-//     //
-//     [86, 60],
-//     [78, 60],
-//     [69, 60],
-//     [60, 60],
-//     [60, 69],
-//     //
-//     [60, 78],
-//     [60, 87],
-//     [60, 95],
-//     [50, 95],
-//     //
-//     [40, 87],
-//     [40, 78],
-//     [40, 69],
-//     //
-//     [13, 60],
-//     [22, 60],
-//     [31, 60],
-//     [40, 60],
-// ]
-
-// const domki = [ //te śmieszne na środku
-//     // na 9
-//     [
-//         [13, 50],
-//         [22, 50],
-//         [31, 50],
-//         [40, 50],
-//     ],
-//     //na 12
-//     [
-//         [50, 40],
-//         [50, 32],
-//         [50, 23],
-//         [50, 14],
-//     ],
-//     // na 3 
-//     [
-//         [60, 50],
-//         [69, 50],
-//         [78, 50],
-//         [86, 50],
-//     ],
-//     // na 6
-//     [
-//         [50, 87],
-//         [50, 78],
-//         [50, 69],
-//         [50, 60],
-//     ]
-// ]
-
-// const bazy = [
-//     [
-//         [5, 5],
-//         [5, 14],
-//         [13, 5],
-//         [13, 14]
-//     ],
-//     [
-//         [85, 5],
-//         [85, 14],
-//         [93, 5],
-//         [93, 14]
-//     ],
-//     [
-//         [95, 95],
-//         [95, 87],
-//         [87, 95],
-//         [87, 87]
-//     ],
-//     [
-//         [5, 95],
-//         [5, 87],
-//         [13, 95],
-//         [13, 87]
-//     ],
-
-// ]
+"use strict";
+import Field from "./FIELDS.js";
+import {
+  pozycjeWRogach,
+  pozycjeWejsciowe,
+  sciezkaGry,
+  pozycjeKoncowe,
+  pozycjeWyjsciowe,
+} from "./wspolrzedne.js";
+import userInGameOperations from "./gameRoomNetwork.js";
 
 const createGameBord = {
-    canvasElement: null,
-    canvasContext: null,
-    canvasSize: null,
-    cordsArray: [],
-    pawnsArray: [],
-    setCanvas() {
-        this.canvasElement = document.querySelector('canvas')
-        this.canvasContext = this.canvasElement.getContext('2d')
-    },
-    resize() {
-        this.canvasSize = document.querySelector('.cnvContainer').getBoundingClientRect(); // położenie względem okna
-        if (this.canvasSize.width > 900) {
-            this.canvasSize.width = 900
-            this.canvasSize.height = 900
+  canvasElement: null, //htmlowy canvas
+  canvasContext: null, // context tego canvasu
+  canvasDivElement: null, //div "nakładka" na canvas
+  canvasSize: null, // rozmiar canvasa
+  gamePathArray: [], // zawiera samą tablicę ścieżki gry jako klasy
+  users: [], // zawiera informacje o użytkownikach
+  pawns: [], // zawiera informacje o pionkach
+  assignedPawns: [], // zawiera pionki
+  //*inicjuje canvas do zostawiania
+  setCanvas() {
+    this.canvasElement = document.querySelector("canvas");
+    this.canvasDivElement = document.querySelector(".fieldContainer");
+    this.canvasContext = this.canvasElement.getContext("2d");
+  },
+  //*odpowiada za skalowanie canvasu oraz diva nakładki
+  scale() {
+    this.canvasSize = document
+      .querySelector(".cnvContainer")
+      .getBoundingClientRect(); // położenie względem okna
+    if (this.canvasSize.width > 900) {
+      this.canvasSize.width = 900;
+      this.canvasSize.height = 900;
+    }
+    //skaluję canvasy i div container żeby zawsze miały tyle samo
+    this.canvasElement.width = this.canvasSize.width; //     Zbieram sobie rozmiar canvasa
+    this.canvasElement.height = this.canvasSize.height;
+    //*skaluję canvas
+    this.canvasContext.scale(1, 1); //skaluje
+    //*rysuję ścieżkę gry
+    this.drawGamePath();
+    //skaluję divy i czyszczę będący containerem planszy
+    this.canvasDivElement.innerHTML = "";
+    this.canvasDivElement.style.top =
+      Math.floor(this.canvasElement.offsetTop) + 5 + "px";
+    this.canvasDivElement.style.left =
+      Math.floor(this.canvasElement.offsetLeft) + 5 + "px";
+    this.canvasDivElement.style.width =
+      Math.floor(this.canvasSize.width) + "px"; // zmieniam rozmiar diva
+    this.canvasDivElement.style.height =
+      Math.floor(this.canvasSize.height) + "px"; // zmieniam rozmiar diva
+  },
+  //*odpoowiada za rysowanie od nowa planszy
+  resize() {
+    createGameBord.scale(); //skaluje
+    //*rysuję pola z poza grą => pozycje w rogach i na środku
+    createGameBord.drawActiveFileds();
+    createGameBord.drawInActiveFileds();
+    userInGameOperations.assignNewPawns(this.assignedPawns);
+  },
+  //* rysuje pola aktywne
+  drawActiveFileds() {
+    sciezkaGry.forEach((index, counter) => {
+      this.gamePathArray.push(
+        new Field(
+          index[0],
+          index[1],
+          this.drawFiled(
+            this.canvasSize.height * (index[0] / 100), //TODO zmień na x
+            this.canvasSize.height * (index[1] / 100), //TODO zmień na y
+            this.canvasSize.height * (6 / 100),
+            "rgb(0, 0, 0, 0.3)",
+            "rgb(0,0,0,0.3)",
+            "rgb(0,0,0,0.3)"
+          )
+        )
+      );
+    });
+    this.pawns.forEach((index, counter) => {
+      console.log(index);
+      let zmienia = false;
+      this.gamePathArray.forEach((elem) => {
+        if (elem.getX == index.x && elem.getY == index.y) {
+          zmienia = true;
         }
-        this.canvasElement.width = this.canvasSize.width; //     Zbieram sobie rozmiar canvasa
-        this.canvasElement.height = this.canvasSize.height
-        this.canvasContext.scale(1, 1) //skaluje
-        this.drawGamePath()
-        this.cordsArray.forEach(elem => this.drawFiled(this.canvasSize.height * (elem.pozycja[0] / 100), this.canvasSize.height * (elem.pozycja[1] / 100), this.canvasSize.height * (3 / 100), elem.colorOne, elem.colorTwo))
-        this.pawnsArray.forEach(elem => this.drawFiled(this.canvasSize.height * (elem.pozycja[0] / 100), this.canvasSize.height * (elem.pozycja[1] / 100), this.canvasSize.height * (3 / 100), elem.colorOne, elem.colorTwo))
-
-    },
-    drawFiled(x, y, srednica, incolor, outcolor) {
-        this.canvasContext.beginPath()
-        this.canvasContext.arc(x, y, srednica, 0, 2 * Math.PI)
-        this.canvasContext.stroke()
-        let gradient = this.canvasContext.createRadialGradient(x, y, srednica / 15, x, y, srednica);
-        gradient.addColorStop(0, incolor);
-        gradient.addColorStop(1, outcolor);
-        this.canvasContext.fillStyle = gradient
-        this.canvasContext.fill()
-    },
-    drawGamePath() {
-        this.canvasContext.beginPath() //                   XXXXXXXX                              YYYYYYYY
-        this.canvasContext.moveTo(this.canvasSize.height * (5 / 100), this.canvasSize.height * (60 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (5 / 100), this.canvasSize.height * (40 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (40 / 100), this.canvasSize.height * (40 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (40 / 100), this.canvasSize.height * (5 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (60 / 100), this.canvasSize.height * (5 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (60 / 100), this.canvasSize.height * (40 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (95 / 100), this.canvasSize.height * (40 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (95 / 100), this.canvasSize.height * (60 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (60 / 100), this.canvasSize.height * (60 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (60 / 100), this.canvasSize.height * (95 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (40 / 100), this.canvasSize.height * (95 / 100));
-        this.canvasContext.lineTo(this.canvasSize.height * (40 / 100), this.canvasSize.height * (60 / 100));
-        this.canvasContext.closePath()
-        this.canvasContext.stroke();
-    },
-
-}
+      });
+      if (zmienia) {
+        elem.changeToPawn(index.color, index.owner, Math.floor(counter / 4)); // pionki są zawsze wielokrotnością 4
+        this.assignedPawns.push(elem);
+      } else {
+        console.log("XD");
+        let independendPawn = new Field(
+          index[0],
+          index[1],
+          this.drawFiled(
+            this.canvasSize.height * (index.x / 100), //TODO zmień na x
+            this.canvasSize.height * (index.y / 100), //TODO zmień na y
+            this.canvasSize.height * (6 / 100),
+            index.color,
+            index.color,
+            index.color
+          )
+        );
+        independendPawn.changeToPawn(
+          index.color,
+          index.owner,
+          Math.floor(counter / 4)
+        );
+        this.assignedPawns.push(independendPawn);
+      }
+    });
+  },
+  //*rysuje nie aktywne pola, które nie mają ingerencji z użytkownikiem => pola w rogach planszy + na samym środku
+  drawInActiveFileds() {
+    //* pozycje na samym środku końcowe => bez możliwości manipulacji
+    pozycjeKoncowe.forEach((elem, counter) => {
+      elem.forEach((index) => {
+        this.drawFiled(
+          this.canvasSize.height * (index[0] / 100), //TODO zmień na x
+          this.canvasSize.height * (index[1] / 100), //TODO zmień na y
+          this.canvasSize.height * (6 / 100),
+          "rgb(0,0,0,0)",
+          "rgb(0,0,0,0)",
+          this.users[counter] == undefined
+            ? "red"
+            : `rgb(${this.users[counter].R},${this.users[counter].G},${this.users[counter].B})`
+        );
+      });
+    });
+    //* pozycje na rogach => czyste bez możliwości manipulacji pionek znajduje się fizycznie nad nimi
+    pozycjeWRogach.forEach((elem, counter) => {
+      elem.forEach((index) => {
+        this.drawFiled(
+          this.canvasSize.height * (index[0] / 100), //TODO zmień na x
+          this.canvasSize.height * (index[1] / 100), //TODO zmień na y
+          this.canvasSize.height * (6 / 100),
+          "rgb(0,0,0,0)",
+          "rgb(0,0,0,0)",
+          this.users[counter] == undefined
+            ? "red"
+            : `rgb(${this.users[counter].R},${this.users[counter].G},${this.users[counter].B})`
+        );
+      });
+    });
+  },
+  //*tworzy pole na canvasie
+  drawFiled(x, y, srednica, incolor, outcolor, border) {
+    let div = document.createElement("div");
+    div.style.left = x + "px";
+    div.style.top = y + "px";
+    div.style.width = srednica + "px";
+    div.style.height = srednica + "px";
+    div.style.borderColor = border;
+    div.style.background = `radial-gradient(${incolor},${outcolor})`;
+    this.canvasDivElement.appendChild(div);
+    return div;
+  },
+  //*tworzy ścieżkę na canvasie ** do zostaiwenia
+  drawGamePath() {
+    this.canvasContext.beginPath(); //                   XXXXXXXX                              YYYYYYYY
+    this.canvasContext.moveTo(
+      this.canvasSize.height * (5 / 100),
+      this.canvasSize.height * (60 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (5 / 100),
+      this.canvasSize.height * (40 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (40 / 100),
+      this.canvasSize.height * (40 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (40 / 100),
+      this.canvasSize.height * (5 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (60 / 100),
+      this.canvasSize.height * (5 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (60 / 100),
+      this.canvasSize.height * (40 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (95 / 100),
+      this.canvasSize.height * (40 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (95 / 100),
+      this.canvasSize.height * (60 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (60 / 100),
+      this.canvasSize.height * (60 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (60 / 100),
+      this.canvasSize.height * (95 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (40 / 100),
+      this.canvasSize.height * (95 / 100)
+    );
+    this.canvasContext.lineTo(
+      this.canvasSize.height * (40 / 100),
+      this.canvasSize.height * (60 / 100)
+    );
+    this.canvasContext.closePath();
+    this.canvasContext.stroke();
+  },
+};
+export { createGameBord };

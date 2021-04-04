@@ -14,7 +14,24 @@ canvas {
   border: solid 5px black;
 }
 
+.fieldContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.fieldContainer div {
+  width: 30px;
+  height: 30px;
+  border-width: 3px;
+  border-style: solid;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
 .cnvContainer {
+  margin: 5px;
   margin: 0% auto;
   width: 80vw;
   height: 80vw;
@@ -53,8 +70,8 @@ canvas {
 
   .playerConetainer {
     border-width: 10px !important;
-    width: 13rem;
-    height: 13rem;
+    width: 10rem;
+    height: 10rem;
   }
 }
 @media only screen and (max-width: 1020px) {
@@ -77,8 +94,8 @@ canvas {
 
   .playerConetainer {
     border-width: 10px !important;
-    width: 13rem;
-    height: 13rem;
+    width: 10rem;
+    height: 8rem;
   }
 }
 @media only screen and (max-width: 450px) {

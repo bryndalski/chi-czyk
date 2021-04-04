@@ -1,16 +1,36 @@
 {
-    "roomOccupants": 0,
-    "players": [],
-    "moves": [],
-    "scores": {},
-    "whoWantsToPlay": [],
-    "pawnPositions": {},
-    "syncTime": 0,
-    "synchRequired": false,
-    "countDownInit": true,
-    "dice": null,
-    "gamer": 0,
-    "remainingTime": null
-
-
+  "roomOccupants": 0,
+  "players": [],
+  "scores": {},
+  "whoWantsToPlay": [],
+  "pawnPositions": [
+    [
+      [5, 5],
+      [5, 14],
+      [13, 5],
+      [13, 14]
+    ],
+    [
+      [85, 5],
+      [85, 14],
+      [93, 5],
+      [93, 14]
+    ],
+    [
+      [95, 95],
+      [95, 87],
+      [87, 95],
+      [87, 87]
+    ],
+    [
+      [5, 95],
+      [5, 87],
+      [13, 95],
+      [13, 87]
+    ]
+  ],
+  "countDownInit": true,
+  "dice": null,
+  "player": 0,
+  "remainingTime": null
 }
