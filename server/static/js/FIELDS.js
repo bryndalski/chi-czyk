@@ -105,6 +105,11 @@ export default class Field {
     this.dice = dice;
     if (this.status == "wDomku") {
       // sprawdzam czy może wyjśc (1 lub 6)
+      //!!! to napraw dodaj opcje na zwykłą ścieżkę gdzie obliczasz odległość do pkt końcowego
+      //!!! dodaj wyłączenie możliwości na domku ale to formalnośc
+      //!!! dodaj obsługę po stronie serwera
+      //!! jak to dodasz skończyłeś
+      //!! miłego dnia <3
       if (
         this.dice == 1 ||
         this.dice == 3 ||
