@@ -10,6 +10,8 @@ export let config = {
   // "getBord": "/getBord",
   getPawns: "/pawnPosition",
   dice: "throwDice", //Do rzucania kostką
+  //nowy ruch
+  newMove: "newMove",
   //content type
   contentTypes: {
     json: "application/json",
@@ -17,3 +19,4 @@ export let config = {
 
   //kolory planszy
 };
+//! dodaj na swerwerze całą obsługę

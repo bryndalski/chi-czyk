@@ -64,6 +64,7 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
   //kosteczka
   app.get("/throwDice", (req, res) => {
     player.throwDice(req, pokojeAktualne);
+    console.log("kości zostały rzucone");
     res.status(200);
   });
 
@@ -75,5 +76,8 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
 
   app.post("/zmianaNastawienia", function (req, res) {
     whoWantsToPlay.wantToPlay(req, res, pokojeAktualne);
+  });
+  app.post("/newMove", function (req, res) {
+    player.move(req, res, pokojeAktualne);
   });
 };

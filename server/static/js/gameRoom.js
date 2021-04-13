@@ -64,6 +64,7 @@ const createGameBord = {
     this.assignedPawns = [];
     this.gamePathArray = [];
     sciezkaGry.forEach((index, counter) => {
+      // rysuje ścieżkę gey
       this.gamePathArray.push(
         new Field(
           index[0],
@@ -81,15 +82,19 @@ const createGameBord = {
     });
     this.pawns.forEach((index, counter) => {
       let zmienia = false;
-      this.gamePathArray.forEach((elem) => {
+      this.gamePathArray.forEach((elem, iCounter) => {
         if (elem.getX == index.x && elem.getY == index.y) {
           zmienia = true;
+          elem.changeToPawn(
+            index.color,
+            index.owner,
+            Math.floor(counter / 4),
+            iCounter
+          ); // pionki są zawsze wielokrotnością 4
+          this.assignedPawns.push(elem);
         }
       });
-      if (zmienia) {
-        elem.changeToPawn(index.color, index.owner, Math.floor(counter / 4)); // pionki są zawsze wielokrotnością 4
-        this.assignedPawns.push(elem);
-      } else {
+      if (!zmienia) {
         let independendPawn = new Field(
           index.x,
           index.y,
@@ -105,7 +110,7 @@ const createGameBord = {
         independendPawn.changeToPawn(
           index.color,
           index.owner,
-          Math.floor(counter / 4)
+          Math.floor(counter / 4),null
         );
         this.assignedPawns.push(independendPawn);
       }
@@ -113,6 +118,7 @@ const createGameBord = {
     //*dodaje każdemu pionkowi informacje o innych ponieważ pracuje tylko na pionkach i fomruje bazy
     this.assignedPawns.forEach((index, counter) => {
       index.setOutherFilds(this.gamePathArray);
+      index.pawnsArray = this.assignedPawns;
     });
   },
   //*rysuje nie aktywne pola, które nie mają ingerencji z użytkownikiem => pola w rogach planszy + na samym środku

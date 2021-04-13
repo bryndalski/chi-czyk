@@ -221,3 +221,18 @@ const bazy = [
         
         */
 //!!!rysuje pionki do wyrzucenia zminić typy z serwera
+
+// bazaDanych.pawnPositions.forEach((index) => {
+//   index.forEach((element, counter) => {
+//     if (element.toString() == req.body.destination.toString()) {
+//     }
+//     if (element.toString() == req.body.from.toString()) {
+//       numerWTablicy = counter;
+//     }
+//   });
+// });
+// console.log(numerWTablicy);
+// if (doUsuniecia) {
+// } else {
+//   let toUpdate = `pawnPositions[${req.body.player}][${numerWTablicy}]`;
+// }

@@ -1,5 +1,10 @@
 "use stric";
 
+const { json } = require("body-parser");
+const e = require("express");
+const { from } = require("responselike");
+const wspolrzedne = require("./wspolrzedne");
+
 module.exports = {
   //* inicjowanie użytkownika
   handleUserInit(req, database) {
@@ -63,7 +68,7 @@ module.exports = {
     });
     return toReturn;
   },
-  //!zarządzanie ruchami
+  //*zarządzanie ruchami
   async handleGame(req, res, database) {
     //sprawdzam czy synchronizacja została wymuszona
     this.readDB(req, database).then((v) => {
@@ -178,5 +183,102 @@ module.exports = {
         database.persistence.compactDatafile(); //czyści DB
       }
     );
+  },
+
+  //#######################____Zarządzanie odbiorem ruchu z bazy danych
+  async move(req, res, database) {
+    let bazaDanych = await this.readDB(req, database);
+    if (await bazaDanych) {
+      let doUsuniecia = false;
+      //numer pionka
+      let numerWyjscia = bazaDanych.pawnPositions[req.body.player].findIndex(
+        (element) => JSON.stringify(element) == JSON.stringify(req.body.from)
+      );
+      //sprawdza czy pionek jest na planszy
+      let indexWTablicy = wspolrzedne.sciezkaGry.findIndex(
+        (element) => JSON.stringify(element) == JSON.stringify(req.body.from)
+      );
+      //przemieszczanie
+      if (indexWTablicy == -1) {
+        this.changeDBMove(
+          req.body.player,
+          numerWyjscia,
+          wspolrzedne.pozycjeWejsciowe[req.body.player],
+          bazaDanych._id,
+          database,
+          res
+        );
+      } else {
+        let zbija = false; //? dodaj algorytm sprawdzanian, czy koordynaty podane nie znajdują się w innych niż twoje pozycjach
+        let daneZbicia = [];
+        // algorytm zbijania
+        let przesiniecie = indexWTablicy + bazaDanych.dice;
+        if (indexWTablicy + bazaDanych.dice > wspolrzedne.sciezkaGry.length) {
+          przesiniecie =
+            -1 *
+            (wspolrzedne.sciezkaGry.length - 1 - indexWTablicy.bazaDanych.dice);
+        } //zmianiam baze danych
+        //*sprawdzam czy następuje zbicie i wykonuje je
+        bazaDanych.pawnPositions.forEach((playerPosition, counter) => {
+          if (counter != req.body.player)
+            playerPosition.forEach((element, placement) => {
+              if (
+                JSON.stringify(element) ==
+                JSON.stringify(wspolrzedne.sciezkaGry[placement])
+              ) {
+                zbija = true;
+                daneZbicia = [
+                  counter, // odpowiednik gracza
+                  placement, // odpowiada numerowi wyjściowemu
+                  wspolrzedne.pozycjeWRogach[placement], // pozycja domku docelowego
+                  bazaDanych._id,
+                  database,
+                  res,
+                ];
+              }
+            });
+        });
+
+        //zbijando po prostu odsyła pionek hen hdzieś niewiadomo gdzie
+        if (zbija) {
+          this.changeDBMove(...daneZbicia);
+        }
+        //obliczam index końcowy dla przemieszczenia
+        //!! sprawdź przesunięcie o 1
+
+        this.changeDBMove(
+          req.body.player,
+          numerWyjscia,
+          wspolrzedne.sciezkaGry[przesiniecie],
+          bazaDanych._id,
+          database,
+          res
+        );
+      }
+      // let pozycjaPionkaWTablicyGry =
+    }
+  },
+  changeDBMove(playerNum, pawnNum, destination, dbID, database, res) {
+    return new Promise((suc, er) => {
+      console.log(`pawnPositions.${playerNum}.${pawnNum}`, destination);
+      database.update(
+        {
+          //zapisuje do bazy danych
+          _id: dbID,
+        },
+        {
+          $set: {
+            [`pawnPositions.${playerNum}.${pawnNum}`]: [...destination],
+            remainingTime: 0,
+          },
+        },
+        {}, // this argument was missing
+        (err, numReplaced) => {
+          database.persistence.compactDatafile(); //czyści DB
+          if (err) res.json({ success: false });
+          else res.json({ success: true });
+        }
+      );
+    });
   },
 };

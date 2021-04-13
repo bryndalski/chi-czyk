@@ -1,3 +1,4 @@
+import { serverOperation } from "/js/XHHTP_CLASS.js";
 import {
   pozycjeWRogach,
   pozycjeWejsciowe,
@@ -5,6 +6,7 @@ import {
   pozycjeKoncowe,
   pozycjeWyjsciowe,
 } from "./wspolrzedne.js";
+import { config } from "/config/config.js";
 
 export default class Field {
   constructor(x, y, element) {
@@ -25,9 +27,10 @@ export default class Field {
     this.otherFilds = []; // tablica wszystkich pionków
     this.dice = null; //opcje kostki na ich bazie oblicza gdzie ma się zatrzymać
     this.status = ""; // status : => może byc w bazie na planszy albo na środku bezpieczny
-
+    this.pawnsArray = []; // zawiera informacje o pionkach
     //do mrugania i klikania
     this.blinkInterval = null; // zawiera interwał mrugania
+    this.currentPositionInArray = null;
   }
   //getters
   get pawnToSend() {
@@ -50,7 +53,7 @@ export default class Field {
   }
 
   //methods
-  changeToPawn(inColor, owner, ownerNumber) {
+  changeToPawn(inColor, owner, ownerNumber, currentPositionInArray) {
     this.owner = owner;
     this.active = true;
     this.ownerNumber = ownerNumber;
@@ -59,6 +62,7 @@ export default class Field {
     this.firstElement = pozycjeWejsciowe[this.ownerNumber];
     this.lastElement = pozycjeWyjsciowe[this.ownerNumber];
     this.element.style.zIndex = 21;
+    this.currentPositionInArray = currentPositionInArray;
     this.setBase();
   }
   setOutherFilds(array) {
@@ -105,11 +109,6 @@ export default class Field {
     this.dice = dice;
     if (this.status == "wDomku") {
       // sprawdzam czy może wyjśc (1 lub 6)
-      //!!! to napraw dodaj opcje na zwykłą ścieżkę gdzie obliczasz odległość do pkt końcowego
-      //!!! dodaj wyłączenie możliwości na domku ale to formalnośc
-      //!!! dodaj obsługę po stronie serwera
-      //!! jak to dodasz skończyłeś
-      //!! miłego dnia <3
       if (
         this.dice == 1 ||
         this.dice == 3 ||
@@ -119,9 +118,16 @@ export default class Field {
         this.dice == 6
       ) {
         this.blink();
-        this.element.addEventListener("mouseover", this.handleHover);
+        this.element.addEventListener("mouseenter", this.handleHover);
         this.element.addEventListener("mouseleave", this.handelMouseOut);
+        this.element.addEventListener("click", this.handleClick);
       }
+    } else if ((this.status = "naPlanszy")) {
+      this.blink();
+      this.element.addEventListener("mouseenter", this.handleHover);
+      this.element.addEventListener("mouseleave", this.handelMouseOut);
+      this.element.addEventListener("click", this.handleClick);
+    } else {
     }
   }
   blink() {
@@ -133,33 +139,76 @@ export default class Field {
       blikStatus = !blikStatus;
     }, 500);
   }
+  setPositions(x, y) {
+    this.element.style.top = y + "%";
+    this.element.style.left = x + "%";
+  }
+  //* przejmuje kliknięcie
   handleClick = () => {
+    if ((this.status = "wDomku")) {
+      this.setPositions(
+        this.otherFilds[this.firstElementInArray].x,
+        this.otherFilds[this.firstElementInArray].y
+      );
+      this.sendMove([
+        this.otherFilds[this.firstElementInArray].x,
+        this.otherFilds[this.firstElementInArray].y,
+      ]);
+    }
+    this.pawnsArray.forEach((index) => index.clearMove());
     //* TU WYSYŁA DO SERWERA PORZĄDANY PUNKT DOSTĘPU
   };
+  //* obsługuje hoover
   handleHover = (e) => {
-    console.log(this);
     this.element.style.cursor = "pointer";
     //*kalkuluję gdzie powinien trafić
     if (this.status == "wDomku") {
-      console.log("soema");
-      console.log(this.otherFilds[this.firstElementInArray]);
       this.otherFilds[this.firstElementInArray].element.style.filter =
         "invert(1)";
+    } else if (this.status == "naPlanszy") {
+      let przesuniecie = this.currentPositionInArray + this.dice;
+      if (
+        this.currentPositionInArray + this.dice >
+        this.otherFilds.length - 1
+      ) {
+        przesuniecie =
+          -1 *
+            (this.otherFilds.length -
+              (this.currentPositionInArray + this.dice)) -
+          1;
+      }
+      console.log(przesuniecie);
+      this.otherFilds[przesuniecie].element.style.filter = "invert(1)";
     }
   };
+  //* obsługije wyjście myszki z pionka
   handelMouseOut = () => {
     this.element.style.cursor = "default";
     this.otherFilds[this.firstElementInArray].element.style.filter =
       "invert(0)";
   };
+  //* czyści ruch
   clearMove() {
-    this.element.removeEventListener("mouseover", this.handleHover);
+    this.element.removeEventListener("mouseenter", this.handleHover);
     this.element.removeEventListener("mouseleave", this.handelMouseOut);
+    this.element.removeEventListener("click", this.handleClick);
     clearInterval(this.blinkInterval);
     this.element.style.background = `radial-gradient(${this.inColor},${this.inColor})`;
-    this.handelMouseOut();
   }
-
+  //! network
+  sendMove(destination) {
+    console.log({
+      player: this.ownerNumber,
+      from: [this.y, this.x],
+    });
+    let nowyRuch = new serverOperation(
+      null,
+      { player: this.ownerNumber, from: [this.x, this.y] },
+      config.newMove,
+      null
+    );
+    nowyRuch.sendData().then((v) => console.log(v));
+  }
   //wywołuje się podczas tworzenia klas zawiera informacje
 }
 

@@ -69,7 +69,6 @@ const userInGameOperations = {
         this.lastPlace == [] ||
         JSON.stringify(this.lastPlace) != JSON.stringify(v)
       ) {
-        console.log("RERENDERUJE");
         this.lastPlace = v;
         createGameBord.pawns = v;
         createGameBord.resize();
@@ -115,7 +114,7 @@ const userInGameOperations = {
       if (nextRequest <= 0) nextRequest = 0;
       setTimeout(function () {
         userInGameOperations.synchGame();
-      }, nextRequest);
+      }, 500);
     });
     if (this.lastPlace == []) this.lastPlace;
   },
