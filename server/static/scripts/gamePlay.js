@@ -1,6 +1,7 @@
 "use stric";
 
 const { json } = require("body-parser");
+const { response } = require("express");
 const e = require("express");
 const { from } = require("responselike");
 const wspolrzedne = require("./wspolrzedne");
@@ -39,17 +40,6 @@ module.exports = {
     let toReturn = new Promise((suc, er) => {
       this.readDB(req, database).then((v) => {
         let pawnArray = []; // przechowywuje  obiety zawierające informacje o :
-        /*
-          {
-            // z tablic
-            x: X
-            y: Y
-            // z informacj i użytkowniku
-            właściciel
-            kolor1
-
-          }
-        */
         //czytam bazę danych i ogarniam pozycje pionków
         v.players.forEach((element, counter) => {
           // dla każdego użytkownika
@@ -129,7 +119,6 @@ module.exports = {
           if (response.players.length == response.player) {
             response.player = 0;
           }
-          //resetuje kostkę jako NULL
           this.setDice(null, req, database);
         } else {
           response.remainingTime = response.remainingTime - 1000; // odejmuję sekundę
@@ -152,6 +141,36 @@ module.exports = {
         );
       } //if ost
       // });
+    });
+  },
+  //* kończy kolejkę gracza => wymusza nową
+  endPawnMove(req, database) {
+    this.readDB(req, database).then((response) => {
+      if (response.remainingTime > 1000) {
+        // unikanie błędu z skipem kolejki
+        response.remainingTime = 60000;
+        response.player = response.player + 1;
+        if (response.players.length == response.player) {
+          response.player = 0;
+        }
+        this.setDice(null, req, database);
+        database.update(
+          {
+            //zapisuje do bazy danych
+            _id: req.session.database._id,
+          },
+          {
+            $set: {
+              remainingTime: 60000,
+              player: response.player,
+            },
+          },
+          {}, // this argument was missing
+          (err, numReplaced) => {
+            database.persistence.compactDatafile(); //czyści DB
+          }
+        );
+      }
     });
   },
   //*koniec tworzenia planszy
@@ -186,79 +205,58 @@ module.exports = {
   },
 
   //#######################____Zarządzanie odbiorem ruchu z bazy danych
-  async move(req, res, database) {
+  async move(req, database) {
     let bazaDanych = await this.readDB(req, database);
     if (await bazaDanych) {
-      let doUsuniecia = false;
-      //numer pionka
+      //*numer pionka
       let numerWyjscia = bazaDanych.pawnPositions[req.body.player].findIndex(
+        // określa numer pionka w bazie danych
         (element) => JSON.stringify(element) == JSON.stringify(req.body.from)
       );
-      //sprawdza czy pionek jest na planszy
+      //*sprawdza czy pionek jest na planszy
       let indexWTablicy = wspolrzedne.sciezkaGry.findIndex(
+        // sprawdza czy pionek znajduje się na planszy jeśli tak zwraca jego pozycje nie => -1
         (element) => JSON.stringify(element) == JSON.stringify(req.body.from)
       );
-      //przemieszczanie
-      if (indexWTablicy == -1) {
-        this.changeDBMove(
-          req.body.player,
-          numerWyjscia,
-          wspolrzedne.pozycjeWejsciowe[req.body.player],
-          bazaDanych._id,
-          database,
-          res
-        );
-      } else {
-        let zbija = false; //? dodaj algorytm sprawdzanian, czy koordynaty podane nie znajdują się w innych niż twoje pozycjach
-        let daneZbicia = [];
-        // algorytm zbijania
-        let przesiniecie = indexWTablicy + bazaDanych.dice;
-        if (indexWTablicy + bazaDanych.dice > wspolrzedne.sciezkaGry.length) {
-          przesiniecie =
-            -1 *
-            (wspolrzedne.sciezkaGry.length - 1 - indexWTablicy.bazaDanych.dice);
-        } //zmianiam baze danych
-        //*sprawdzam czy następuje zbicie i wykonuje je
-        bazaDanych.pawnPositions.forEach((playerPosition, counter) => {
-          if (counter != req.body.player)
-            playerPosition.forEach((element, placement) => {
-              if (
-                JSON.stringify(element) ==
-                JSON.stringify(wspolrzedne.sciezkaGry[placement])
-              ) {
-                zbija = true;
-                daneZbicia = [
-                  counter, // odpowiednik gracza
-                  placement, // odpowiada numerowi wyjściowemu
-                  wspolrzedne.pozycjeWRogach[placement], // pozycja domku docelowego
-                  bazaDanych._id,
-                  database,
-                  res,
-                ];
-              }
-            });
-        });
-
-        //zbijando po prostu odsyła pionek hen hdzieś niewiadomo gdzie
-        if (zbija) {
-          this.changeDBMove(...daneZbicia);
-        }
-        //obliczam index końcowy dla przemieszczenia
-        //!! sprawdź przesunięcie o 1
-
-        this.changeDBMove(
-          req.body.player,
-          numerWyjscia,
-          wspolrzedne.sciezkaGry[przesiniecie],
-          bazaDanych._id,
-          database,
-          res
-        );
+      //* oblicza finalny index w tablicy => przemieszczenie
+      let przesiniecie = indexWTablicy + bazaDanych.dice;
+      if (indexWTablicy + bazaDanych.dice > wspolrzedne.sciezkaGry.length) {
+        przesiniecie =
+          -1 *
+          (wspolrzedne.sciezkaGry.length - 1 - indexWTablicy.bazaDanych.dice);
       }
-      // let pozycjaPionkaWTablicyGry =
+      //*sprawdzam czy następuje zbicie i wykonuje je
+      bazaDanych.pawnPositions.forEach((playerPosition, counter) => {
+        if (counter != req.body.player)
+          playerPosition.forEach((element, placement) => {
+            if (
+              JSON.stringify(element) ==
+              JSON.stringify(wspolrzedne.sciezkaGry[przesiniecie])
+            ) {
+              console.log("następuje zbicie ");
+              this.changeDBMove(
+                counter, // odpowiednik gracza
+                placement, // odpowiada numerowi wyjściowemu
+                wspolrzedne.pozycjeWRogach[counter][placement], // pozycja domku docelowego
+                bazaDanych._id,
+                database
+              );
+            }
+          });
+      });
+      //* wykonuje move
+      this.changeDBMove(
+        req.body.player,
+        numerWyjscia,
+        indexWTablicy == -1
+          ? wspolrzedne.pozycjeWejsciowe[req.body.player]
+          : wspolrzedne.sciezkaGry[przesiniecie],
+        bazaDanych._id,
+        database
+      );
     }
   },
-  changeDBMove(playerNum, pawnNum, destination, dbID, database, res) {
+  changeDBMove(playerNum, pawnNum, destination, dbID, database) {
     return new Promise((suc, er) => {
       console.log(`pawnPositions.${playerNum}.${pawnNum}`, destination);
       database.update(
@@ -269,14 +267,11 @@ module.exports = {
         {
           $set: {
             [`pawnPositions.${playerNum}.${pawnNum}`]: [...destination],
-            remainingTime: 0,
           },
         },
         {}, // this argument was missing
         (err, numReplaced) => {
           database.persistence.compactDatafile(); //czyści DB
-          if (err) res.json({ success: false });
-          else res.json({ success: true });
         }
       );
     });

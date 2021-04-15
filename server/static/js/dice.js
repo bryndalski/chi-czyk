@@ -14,6 +14,7 @@ class Dice {
   //methods
 
   throwDice() {
+    console.log("rzucam");
     let kosteczka = new serverOperation(null, null, config.dice, null);
     kosteczka.fetchData().then((value) => {});
   }

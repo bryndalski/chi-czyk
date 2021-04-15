@@ -25,10 +25,6 @@ const pokojeAktualne = new dataBase({
     filename: './static/database/rozgrywka.db',
     autoload: true
 });
-const historia = new dataBase({
-    filename: './static/database/historia.db',
-    autoload: true
-});
 //!!! end of app user
 //* requires 
 require("colors");

@@ -30,7 +30,7 @@ export default class Field {
     this.pawnsArray = []; // zawiera informacje o pionkach
     //do mrugania i klikania
     this.blinkInterval = null; // zawiera interwał mrugania
-    this.currentPositionInArray = null;
+    this.currentPositionInArray = null; // aktualna pozycja w tablicb
   }
   //getters
   get pawnToSend() {
@@ -145,16 +145,46 @@ export default class Field {
   }
   //* przejmuje kliknięcie
   handleClick = () => {
-    if ((this.status = "wDomku")) {
-      this.setPositions(
-        this.otherFilds[this.firstElementInArray].x,
-        this.otherFilds[this.firstElementInArray].y
-      );
-      this.sendMove([
-        this.otherFilds[this.firstElementInArray].x,
-        this.otherFilds[this.firstElementInArray].y,
-      ]);
+    switch (this.status) {
+      case "wDomku":
+        this.setPositions(
+          this.otherFilds[this.firstElementInArray].x,
+          this.otherFilds[this.firstElementInArray].y
+        );
+        break;
+      case "naPlanszy": {
+        let przesuniecie = this.currentPositionInArray + this.dice;
+        if (
+          this.currentPositionInArray + this.dice >
+          this.otherFilds.length - 1
+        ) {
+          przesuniecie =
+            -1 *
+              (this.otherFilds.length -
+                (this.currentPositionInArray + this.dice)) -
+            1;
+        }
+        /*
+          żeby mogło ogarniac czy trafia na domek 
+
+          
+
+
+
+
+        */
+        if (przesuniecie > this.lastElementInArray) {
+          // jeśli pozycja świadczy o wejściu do bazy
+        }
+        console.log("siup");
+        this.setPositions(
+          this.otherFilds[przesuniecie].x,
+          this.otherFilds[przesuniecie].y
+        );
+        break;
+      }
     }
+    this.sendMove();
     this.pawnsArray.forEach((index) => index.clearMove());
     //* TU WYSYŁA DO SERWERA PORZĄDANY PUNKT DOSTĘPU
   };
@@ -177,7 +207,6 @@ export default class Field {
               (this.currentPositionInArray + this.dice)) -
           1;
       }
-      console.log(przesuniecie);
       this.otherFilds[przesuniecie].element.style.filter = "invert(1)";
     }
   };
@@ -196,18 +225,15 @@ export default class Field {
     this.element.style.background = `radial-gradient(${this.inColor},${this.inColor})`;
   }
   //! network
-  sendMove(destination) {
-    console.log({
-      player: this.ownerNumber,
-      from: [this.y, this.x],
-    });
+  sendMove() {
     let nowyRuch = new serverOperation(
       null,
       { player: this.ownerNumber, from: [this.x, this.y] },
       config.newMove,
       null
     );
-    nowyRuch.sendData().then((v) => console.log(v));
+    nowyRuch.sendData();
+    nowyRuch.fetchData();
   }
   //wywołuje się podczas tworzenia klas zawiera informacje
 }

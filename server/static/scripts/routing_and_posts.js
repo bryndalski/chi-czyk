@@ -32,11 +32,6 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
       players: req.session.database.players,
     });
   });
-  //   app.get("/getBord", (req, res) => {
-  //     let toSend = player.createBasicBord(req, res, pokojeAktualne);
-  //     res.json(toSend);
-  //   });
-
   app.get("/pawnPosition", (req, res) => {
     //w zależności od sytuacji jeśli gra została zainicjowana odsyła albo czyste położenie początkowe albo
     req.session.incoming = new Date().getTime();
@@ -65,9 +60,14 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
   app.get("/throwDice", (req, res) => {
     player.throwDice(req, pokojeAktualne);
     console.log("kości zostały rzucone");
-    res.status(200);
+    res.sendStatus(200);
+  });
+  app.get("/newMove", (req, res) => {
+    player.endPawnMove(req, pokojeAktualne);
+    res.sendStatus(200);
   });
 
+  //TODO TU SKOŃCZYŁEŚ
   //*POST SECTION
 
   app.post("/askForRoom", function (req, res) {
@@ -78,6 +78,7 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
     whoWantsToPlay.wantToPlay(req, res, pokojeAktualne);
   });
   app.post("/newMove", function (req, res) {
-    player.move(req, res, pokojeAktualne);
+    player.move(req, pokojeAktualne);
+    res.sendStatus(200);
   });
 };

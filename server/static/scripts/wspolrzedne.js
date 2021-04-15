@@ -54,7 +54,6 @@ module.exports = {
     [31, 60],
     [40, 60],
   ],
-
   pozycjeKoncowe: [
     //te śmieszne na środku
     // na 9
@@ -86,7 +85,6 @@ module.exports = {
       [50, 60],
     ],
   ],
-
   pozycjeWRogach: [
     //pozycje pionków w rogach (ich macierzyste położenie)
     [
@@ -114,17 +112,6 @@ module.exports = {
       [13, 87],
     ],
   ],
-
-  // polaPozaGra: pozycjeKoncowe[0].concat(
-  //   pozycjeKoncowe[1],
-  //   pozycjeKoncowe[2],
-  //   pozycjeKoncowe[3],
-  //   pozycjeWRogach[0],
-  //   pozycjeWRogach[1],
-  //   pozycjeWRogach[2],
-  //   pozycjeWRogach[3]
-  // ),
-
   pozycjeWyjsciowe: [
     [5, 50], // na 9
     [50, 5], // na 12
