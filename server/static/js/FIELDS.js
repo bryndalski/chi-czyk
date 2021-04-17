@@ -31,6 +31,7 @@ export default class Field {
     //do mrugania i klikania
     this.blinkInterval = null; // zawiera interwał mrugania
     this.currentPositionInArray = null; // aktualna pozycja w tablicb
+    this.przesuniecie = null; //oblicza przesunięcie => docelowy index tablicy w którym powinien znaleźć się pionek
   }
   //getters
   get pawnToSend() {
@@ -123,6 +124,40 @@ export default class Field {
         this.element.addEventListener("click", this.handleClick);
       }
     } else if ((this.status = "naPlanszy")) {
+      //!!! napraw ten błąd
+      
+      this.przesuniecie = this.currentPositionInArray + this.dice;
+      let expr = this.otherFilds.length - 1 - this.przesuniecie;
+      if (expr == 0) this.przesuniecie = 0;
+      else if (expr < 0) {
+        console.log(
+          `EXPR równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
+        );
+        this.przesuniecie = expr * -2;
+        if (this.przesuniecie > this.lastElementInArray) {
+          console.log("wchodzę na start");
+          // this.resztaDoWchodzenia  =
+        }
+      }
+
+      console.log(
+        `przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy`
+      );
+      /*
+      obliczenie jak wyglądać powinno wejście do bazy :
+
+        jeśli odległość od bazy (this.firstElement) 
+        
+        jeśli od długości tablcy odiąć ilość pół do miejsca początkowego tj 
+        (tablica.wszystkich -  pozycja początkowa)
+        
+       39 - długość całej trasy 
+
+        (if this.)
+
+      
+      */
+
       this.blink();
       this.element.addEventListener("mouseenter", this.handleHover);
       this.element.addEventListener("mouseleave", this.handelMouseOut);
@@ -153,33 +188,9 @@ export default class Field {
         );
         break;
       case "naPlanszy": {
-        let przesuniecie = this.currentPositionInArray + this.dice;
-        if (
-          this.currentPositionInArray + this.dice >
-          this.otherFilds.length - 1
-        ) {
-          przesuniecie =
-            -1 *
-              (this.otherFilds.length -
-                (this.currentPositionInArray + this.dice)) -
-            1;
-        }
-        /*
-          żeby mogło ogarniac czy trafia na domek 
-
-          
-
-
-
-
-        */
-        if (przesuniecie > this.lastElementInArray) {
-          // jeśli pozycja świadczy o wejściu do bazy
-        }
-        console.log("siup");
         this.setPositions(
-          this.otherFilds[przesuniecie].x,
-          this.otherFilds[przesuniecie].y
+          this.otherFilds[this.przesuniecie].x,
+          this.otherFilds[this.przesuniecie].y
         );
         break;
       }
@@ -191,30 +202,30 @@ export default class Field {
   //* obsługuje hoover
   handleHover = (e) => {
     this.element.style.cursor = "pointer";
-    //*kalkuluję gdzie powinien trafić
-    if (this.status == "wDomku") {
-      this.otherFilds[this.firstElementInArray].element.style.filter =
-        "invert(1)";
-    } else if (this.status == "naPlanszy") {
-      let przesuniecie = this.currentPositionInArray + this.dice;
-      if (
-        this.currentPositionInArray + this.dice >
-        this.otherFilds.length - 1
-      ) {
-        przesuniecie =
-          -1 *
-            (this.otherFilds.length -
-              (this.currentPositionInArray + this.dice)) -
-          1;
-      }
-      this.otherFilds[przesuniecie].element.style.filter = "invert(1)";
+    switch (this.status) {
+      case "wDomku":
+        this.otherFilds[this.firstElementInArray].element.style.filter =
+          "invert(1)";
+        break;
+      case "naPlanszy":
+        this.otherFilds[this.przesuniecie].element.style.filter = "invert(1)";
+        break;
     }
+    //*kalkuluję gdzie powinien trafić
   };
   //* obsługije wyjście myszki z pionka
   handelMouseOut = () => {
-    this.element.style.cursor = "default";
-    this.otherFilds[this.firstElementInArray].element.style.filter =
-      "invert(0)";
+    switch (this.status) {
+      case "wDomu":
+        this.element.style.cursor = "default";
+        this.otherFilds[this.firstElementInArray].element.style.filter =
+          "invert(0)";
+        break;
+      case "naPlanszy":
+        this.element.style.cursor = "default";
+        this.otherFilds[this.przesuniecie].element.style.filter = "invert(0)";
+        break;
+    }
   };
   //* czyści ruch
   clearMove() {
