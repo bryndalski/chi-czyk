@@ -12,6 +12,7 @@ export let config = {
   dice: "throwDice", //Do rzucania kostką
   //nowy ruch
   newMove: "newMove",
+  sendToBase:"sendToBase",
   //content type
   contentTypes: {
     json: "application/json",

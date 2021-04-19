@@ -14,9 +14,8 @@ class Dice {
   //methods
 
   throwDice() {
-    console.log("rzucam");
     let kosteczka = new serverOperation(null, null, config.dice, null);
-    kosteczka.fetchData().then((value) => {});
+    kosteczka.fetchData()
   }
   clearDice() {
     this.diceContainer.src = "/images/question.svg";

@@ -220,11 +220,10 @@ module.exports = {
       );
       //* oblicza finalny index w tablicy => przemieszczenie
       let przesuniecie = indexWTablicy + bazaDanych.dice;
-      if (przesuniecie == wspolrzedne.sciezkaGry.length - 1) przesuniecie = 0;
-      else if (przesuniecie > wspolrzedne.sciezkaGry.length - 1)
-        przesuniecie -= wspolrzedne.sciezkaGry.length - 2;
+      let expr = wspolrzedne.sciezkaGry.length - przesuniecie;
+      if (expr === 0) przesuniecie = 0;
+      else if (expr < 0) przesuniecie = expr * -1;
       console.log(`przesunięcie wynosi ${przesuniecie}`);
-      //!!! TODO napraw zbijanie na pozycji wejściowej
       //*sprawdzam czy następuje zbicie i wykonuje je
       bazaDanych.pawnPositions.forEach((playerPosition, counter) => {
         if (counter != req.body.player)
@@ -256,6 +255,22 @@ module.exports = {
           ? wspolrzedne.pozycjeWejsciowe[req.body.player]
           : wspolrzedne.sciezkaGry[przesuniecie],
         bazaDanych._id,
+        database
+      );
+    }
+  },
+  async goToBase(req, database) {
+    let bazaDanych = await this.readDB(req, database);
+    if (await bazaDanych) {
+      let numerWyjscia = bazaDanych.pawnPositions[req.body.player].findIndex(
+        // określa numer pionka w bazie danych
+        (element) => JSON.stringify(element) == JSON.stringify(req.body.from)
+      );
+      this.changeDBMove(
+        req.body.player,
+        numerWyjscia,
+        wspolrzedne.pozycjeKoncowe[req.body.player][req.body.to],
+        req.session.database._id,
         database
       );
     }

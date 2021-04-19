@@ -42,7 +42,6 @@ async function enterGame() {
             }
         })
     } catch (err) {}
-    console.log(userData)
     if (shallBeSent) {
         let serverRequest = new serverOperation(null, userData, config.ask_for_room, "BŁĄÐ ZAPYTANIA O POKÓJ") //TODO zmień mnie 
         let respond = await serverRequest.sendData()
@@ -52,7 +51,6 @@ async function enterGame() {
 
 
 function respondHandler(respond) {
-    console.log(respond)
     if (respond.redirect) {
         window.localStorage.setItem("roomId", respond.roomId)
         window.location.href = "/poczekalnia"

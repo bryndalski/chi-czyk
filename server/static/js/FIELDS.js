@@ -1,8 +1,8 @@
 import { serverOperation } from "/js/XHHTP_CLASS.js";
 import {
   pozycjeWRogach,
-  pozycjeWejsciowe,
   sciezkaGry,
+  pozycjeWejsciowe,
   pozycjeKoncowe,
   pozycjeWyjsciowe,
 } from "./wspolrzedne.js";
@@ -17,7 +17,7 @@ export default class Field {
     this.owner = null; // właściciel pionka
     this.ownerNumber = null; // numer właściciela pionka pomaga przy tablicack
     this.type = "field"; // pobiera z bazy danych i ustawia automatycznie pozycje na pionek lub pole
-    this.active = true; //true || false => sprawdza czy pionek będzie można klikać czy jest np w dużej bazie
+    this.active = false; //true || false => sprawdza czy pionek będzie można klikać czy jest np w dużej bazie
     this.belongsToPath = true; // sprawdza czy należy do podstawowej ścieżki gry => ułatwia mapowanie po stronie klienta + obliczanie pozycji następnego jest łatiwejsze
     this.firstElement = null; // pozycja wejściowa
     this.firstElementInArray = null; // pozycja 1 elementu w tablicy
@@ -26,8 +26,9 @@ export default class Field {
     this.curremtPosition = null; // sprawdza czy znajduje się aktualnie w bazie lub w ostatnim domku
     this.otherFilds = []; // tablica wszystkich pionków
     this.dice = null; //opcje kostki na ich bazie oblicza gdzie ma się zatrzymać
-    this.status = ""; // status : => może byc w bazie na planszy albo na środku bezpieczny
+    this.status = "spi"; // status : => może byc w bazie na planszy albo na środku bezpieczny
     this.pawnsArray = []; // zawiera informacje o pionkach
+    this.lastPositions = []; //zawiera ostanie pozycje na środku dostępne dla tego pionka
     //do mrugania i klikania
     this.blinkInterval = null; // zawiera interwał mrugania
     this.currentPositionInArray = null; // aktualna pozycja w tablicb
@@ -66,14 +67,15 @@ export default class Field {
     this.currentPositionInArray = currentPositionInArray;
     this.setBase();
   }
+  //* ustawia nową tablice
   setOutherFilds(array) {
     this.otherFilds = array;
     if (this.ownerNumber != null) this.setBase();
-  }
+  } //* zmiania kolor bordera przypisanego pionkowi
   changeBorder(color) {
     this.element.style.borderColor = color;
   }
-  //!dostępne tylko dla pionków  prototyp
+  //?dostępne tylko dla pionków  prototyp
   setBase() {
     this.otherFilds.forEach((index, counter) => {
       if (
@@ -87,7 +89,7 @@ export default class Field {
         index.changeBorder(this.inColor);
       }
     });
-    //sprawdza czy pionek znajduje się w bazie  na ścieżce lub na końcu i nadaje mu status
+    //?sprawdza czy pionek znajduje się w bazie  na ścieżce lub na końcu i nadaje mu status
     if (
       JSON.stringify(pozycjeWRogach[this.ownerNumber]).includes(
         JSON.stringify([this.x, this.y])
@@ -95,11 +97,16 @@ export default class Field {
     ) {
       this.status = "wDomku";
     } else if (
-      JSON.stringify(!pozycjeKoncowe[this.ownerNumber]).includes(
+      JSON.stringify(sciezkaGry[this.ownerNumber]).includes(
         JSON.stringify([this.x, this.y])
       )
     ) {
       this.status = "naPlanszy";
+    } else if (
+      JSON.stringify(pozycjeKoncowe[this.ownerNumber]).includes(
+        JSON.stringify([this.x, this.y])
+      )
+    ) {
     } else {
       this.active = false; // nieaktywny
       this.status = "spi";
@@ -107,6 +114,7 @@ export default class Field {
   }
   //?OPCJE DLA GRACZA
   enablePawn(dice) {
+    console.log(this.status);
     this.dice = dice;
     if (this.status == "wDomku") {
       // sprawdzam czy może wyjśc (1 lub 6)
@@ -118,53 +126,48 @@ export default class Field {
         this.dice == 5 ||
         this.dice == 6
       ) {
-        this.blink();
-        this.element.addEventListener("mouseenter", this.handleHover);
-        this.element.addEventListener("mouseleave", this.handelMouseOut);
-        this.element.addEventListener("click", this.handleClick);
+        this.startMove();
       }
     } else if ((this.status = "naPlanszy")) {
-      //!!! napraw ten błąd
-      
       this.przesuniecie = this.currentPositionInArray + this.dice;
-      let expr = this.otherFilds.length - 1 - this.przesuniecie;
-      if (expr == 0) this.przesuniecie = 0;
-      else if (expr < 0) {
+      let expr = this.otherFilds.length - this.przesuniecie;
+      if (expr === 0) {
+        console.log(
+          `EXPR które nie działa przy 39 równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
+        );
+        this.przesuniecie = 0;
+      } else if (expr < 0) {
         console.log(
           `EXPR równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
         );
-        this.przesuniecie = expr * -2;
-        if (this.przesuniecie > this.lastElementInArray) {
-          console.log("wchodzę na start");
-          // this.resztaDoWchodzenia  =
-        }
+        this.przesuniecie = expr * -1;
       }
-
+      if (
+        this.przesuniecie > this.lastElementInArray &&
+        this.currentPositionInArray < this.firstElementInArray
+      ) {
+        console.log(
+          `wchodzę na start na starcie mogę wykonać ${
+            this.przesuniecie - this.lastElementInArray - 1
+          }`
+        );
+        this.status = "wBazie";
+        this.przesuniecie = this.przesuniecie - this.lastElementInArray - 1;
+        if (
+          this.przesuniecie < 4 &&
+          this.lastPositions[this.przesuniecie].status == "spi"
+        ) {
+          this.startMove();
+        }
+      } else {
+        this.startMove();
+      }
       console.log(
         `przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy`
       );
-      /*
-      obliczenie jak wyglądać powinno wejście do bazy :
-
-        jeśli odległość od bazy (this.firstElement) 
-        
-        jeśli od długości tablcy odiąć ilość pół do miejsca początkowego tj 
-        (tablica.wszystkich -  pozycja początkowa)
-        
-       39 - długość całej trasy 
-
-        (if this.)
-
-      
-      */
-
-      this.blink();
-      this.element.addEventListener("mouseenter", this.handleHover);
-      this.element.addEventListener("mouseleave", this.handelMouseOut);
-      this.element.addEventListener("click", this.handleClick);
-    } else {
     }
   }
+  //* odpowiada za mruganie
   blink() {
     let blikStatus = true;
     this.blinkInterval = setInterval(() => {
@@ -174,6 +177,7 @@ export default class Field {
       blikStatus = !blikStatus;
     }, 500);
   }
+  //*nadaje nową pozycje pionka
   setPositions(x, y) {
     this.element.style.top = y + "%";
     this.element.style.left = x + "%";
@@ -186,16 +190,35 @@ export default class Field {
           this.otherFilds[this.firstElementInArray].x,
           this.otherFilds[this.firstElementInArray].y
         );
+        this.sendMove();
+
         break;
       case "naPlanszy": {
         this.setPositions(
           this.otherFilds[this.przesuniecie].x,
           this.otherFilds[this.przesuniecie].y
         );
+        this.sendMove();
+
         break;
       }
+      case "wBazie":
+        console.log("wysyłam go do bazy ");
+        let nowyRuch = new serverOperation(null, null, config.newMove, null);
+        nowyRuch.fetchData();
+        nowyRuch.changeParams(
+          null,
+          {
+            player: this.ownerNumber,
+            from: [this.x, this.y],
+            to: this.przesuniecie,
+          },
+          config.sendToBase,
+          null
+        );
+        nowyRuch.sendData();
+        break;
     }
-    this.sendMove();
     this.pawnsArray.forEach((index) => index.clearMove());
     //* TU WYSYŁA DO SERWERA PORZĄDANY PUNKT DOSTĘPU
   };
@@ -209,6 +232,11 @@ export default class Field {
         break;
       case "naPlanszy":
         this.otherFilds[this.przesuniecie].element.style.filter = "invert(1)";
+        break;
+      case "wBazie":
+        console.log(this.lastPositions);
+        this.lastPositions[this.przesuniecie].element.style.filter =
+          "invert(1)";
         break;
     }
     //*kalkuluję gdzie powinien trafić
@@ -225,17 +253,29 @@ export default class Field {
         this.element.style.cursor = "default";
         this.otherFilds[this.przesuniecie].element.style.filter = "invert(0)";
         break;
+      case "wBazie":
+        this.element.style.cursor = "default";
+        this.lastPositions[this.przesuniecie].element.style.filter =
+          "invert(0)";
+        break;
     }
   };
   //* czyści ruch
   clearMove() {
+    this.active = false;
     this.element.removeEventListener("mouseenter", this.handleHover);
     this.element.removeEventListener("mouseleave", this.handelMouseOut);
     this.element.removeEventListener("click", this.handleClick);
     clearInterval(this.blinkInterval);
     this.element.style.background = `radial-gradient(${this.inColor},${this.inColor})`;
+    this.lastPositions.forEach(
+      (index) => (index.element.style.filter = "invert(0)")
+    );
+    this.otherFilds.forEach(
+      (index) => (index.element.style.filter = "invert(0)")
+    );
   }
-  //! network
+  //* network
   sendMove() {
     let nowyRuch = new serverOperation(
       null,
@@ -246,17 +286,13 @@ export default class Field {
     nowyRuch.sendData();
     nowyRuch.fetchData();
   }
+  //*rozpoczyna ruch dla tego konkretnego pionka
+  startMove() {
+    this.active = true;
+    this.blink();
+    this.element.addEventListener("mouseenter", this.handleHover);
+    this.element.addEventListener("mouseleave", this.handelMouseOut);
+    this.element.addEventListener("click", this.handleClick);
+  }
   //wywołuje się podczas tworzenia klas zawiera informacje
 }
-
-/*
-NIM ZAPOMNIJSZ
-
-koncowe pozycje określasz na bazie współrzędnych tak aby każdy pionek dostał indywidualną pozycję końcową przypisaną tylko jemu
-ewenutalnie możesz sprawdzać które zostały ale to opcja trydneijsza zobacz jak z czasem storisz
-
-
-wejście do bazy => wtedy gdy wyrzuci się liczbę dzielącą pionek od pkt do bazy (lastElement)
-
-
-*/

@@ -22,7 +22,6 @@ export class serverOperation {
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // console.log("recived GET", data)
                     success(data)
                 })
                 .catch((error) => {
@@ -48,7 +47,6 @@ export class serverOperation {
                 .then(response => response.json())
                 .then(async data => {
                     this.response = data
-                    console.log(this.response)
                     success(data)
                 })
                 .catch((error) => {

@@ -18,6 +18,7 @@ const createGameBord = {
   users: [], // zawiera informacje o użytkownikach
   pawns: [], // zawiera informacje o pionkach
   assignedPawns: [], // zawiera pionki
+  lastFil: [], // zawiera wszystkie pozycje końcowe w grze
   //*inicjuje canvas do zostawiania
   setCanvas() {
     this.canvasElement = document.querySelector("canvas");
@@ -55,8 +56,8 @@ const createGameBord = {
   resize() {
     createGameBord.scale(); //skaluje
     //*rysuję pola z poza grą => pozycje w rogach i na środku
-    createGameBord.drawActiveFileds();
     createGameBord.drawInActiveFileds();
+    createGameBord.drawActiveFileds();
     userInGameOperations.assignNewPawns(this.assignedPawns);
   },
   //* rysuje pola aktywne
@@ -110,31 +111,42 @@ const createGameBord = {
         independendPawn.changeToPawn(
           index.color,
           index.owner,
-          Math.floor(counter / 4),null
+          Math.floor(counter / 4),
+          null
         );
         this.assignedPawns.push(independendPawn);
       }
     });
     //*dodaje każdemu pionkowi informacje o innych ponieważ pracuje tylko na pionkach i fomruje bazy
+    let licznkik = -1;
     this.assignedPawns.forEach((index, counter) => {
+      if (counter % 4 == 0) licznkik++;
       index.setOutherFilds(this.gamePathArray);
       index.pawnsArray = this.assignedPawns;
+      index.lastPositions = this.lastFil[licznkik];
     });
   },
   //*rysuje nie aktywne pola, które nie mają ingerencji z użytkownikiem => pola w rogach planszy + na samym środku
   drawInActiveFileds() {
     //* pozycje na samym środku końcowe => bez możliwości manipulacji
     pozycjeKoncowe.forEach((elem, counter) => {
+      this.lastFil[counter] = [];
       elem.forEach((index) => {
-        this.drawFiled(
-          this.canvasSize.height * (index[0] / 100), //TODO zmień na x
-          this.canvasSize.height * (index[1] / 100), //TODO zmień na y
-          this.canvasSize.height * (6 / 100),
-          "rgb(0,0,0,0)",
-          "rgb(0,0,0,0)",
-          this.users[counter] == undefined
-            ? "red"
-            : `rgb(${this.users[counter].R},${this.users[counter].G},${this.users[counter].B})`
+        this.lastFil[counter].push(
+          new Field(
+            index[0],
+            index[1],
+            this.drawFiled(
+              this.canvasSize.height * (index[0] / 100), //TODO zmień na x
+              this.canvasSize.height * (index[1] / 100), //TODO zmień na y
+              this.canvasSize.height * (6 / 100),
+              "rgb(0,0,0,0)",
+              "rgb(0,0,0,0)",
+              this.users[counter] == undefined
+                ? "red"
+                : `rgb(${this.users[counter].R},${this.users[counter].G},${this.users[counter].B})`
+            )
+          )
         );
       });
     });

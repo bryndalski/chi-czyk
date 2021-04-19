@@ -63,15 +63,18 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
     res.sendStatus(200);
   });
   app.get("/newMove", (req, res) => {
+    console.log("essa");
     player.endPawnMove(req, pokojeAktualne);
     res.sendStatus(200);
   });
-
-  //TODO TU SKOŃCZYŁEŚ
   //*POST SECTION
 
   app.post("/askForRoom", function (req, res) {
     new user.NewUser(req.body, pokojeAktualne, res, req);
+  });
+  app.post("/sendToBase", function (req, res) {
+    player.goToBase(req, pokojeAktualne);
+    res.sendStatus(200);
   });
 
   app.post("/zmianaNastawienia", function (req, res) {
