@@ -26,6 +26,9 @@ window.addEventListener("DOMContentLoaded", async () => {
 });
 window.addEventListener("resize", () => {
   createGameBord.resize(); // skaluję canvas
+  userInGameOperations.lastPlace = [];
+  userInGameOperations.lastDice = null;
+  userInGameOperations.createPawns();
 });
 
 const userInGameOperations = {
@@ -69,6 +72,7 @@ const userInGameOperations = {
         this.lastPlace == [] ||
         JSON.stringify(this.lastPlace) != JSON.stringify(v)
       ) {
+        console.log("renderuje");
         this.lastPlace = v;
         createGameBord.pawns = v;
         createGameBord.resize();

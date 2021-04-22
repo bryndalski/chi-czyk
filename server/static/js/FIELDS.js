@@ -75,7 +75,7 @@ export default class Field {
   changeBorder(color) {
     this.element.style.borderColor = color;
   }
-  //?dostępne tylko dla pionków  prototyp
+  //*dostępne tylko dla pionków
   setBase() {
     this.otherFilds.forEach((index, counter) => {
       if (
@@ -90,81 +90,118 @@ export default class Field {
       }
     });
     //?sprawdza czy pionek znajduje się w bazie  na ścieżce lub na końcu i nadaje mu status
-    if (
-      JSON.stringify(pozycjeWRogach[this.ownerNumber]).includes(
-        JSON.stringify([this.x, this.y])
-      )
-    ) {
-      this.status = "wDomku";
-    } else if (
-      JSON.stringify(sciezkaGry[this.ownerNumber]).includes(
-        JSON.stringify([this.x, this.y])
-      )
-    ) {
-      this.status = "naPlanszy";
-    } else if (
-      JSON.stringify(pozycjeKoncowe[this.ownerNumber]).includes(
-        JSON.stringify([this.x, this.y])
-      )
-    ) {
-    } else {
-      this.active = false; // nieaktywny
-      this.status = "spi";
-    }
+    // console.log("sprawdzam pionka");
+    if (this.ownerNumber != null)
+      if (
+        JSON.stringify(pozycjeWRogach[this.ownerNumber]).includes(
+          JSON.stringify([this.x, this.y])
+        )
+      ) {
+        this.status = "wDomku";
+      } else if (
+        JSON.stringify(sciezkaGry).includes(JSON.stringify([this.x, this.y]))
+      ) {
+        this.status = "naPlanszy";
+      } else if (
+        JSON.stringify(pozycjeKoncowe[this.ownerNumber]).includes(
+          JSON.stringify([this.x, this.y])
+        )
+      ) {
+        this.status = "wBazie";
+      } else {
+        this.active = false; // nieaktywny
+        this.status = "spi";
+      }
+    else this.status = "spi";
+    // console.log(this.status);
   }
   //?OPCJE DLA GRACZA
   enablePawn(dice) {
     console.log(this.status);
     this.dice = dice;
-    if (this.status == "wDomku") {
-      // sprawdzam czy może wyjśc (1 lub 6)
-      if (
-        this.dice == 1 ||
-        this.dice == 3 ||
-        this.dice == 2 ||
-        this.dice == 4 ||
-        this.dice == 5 ||
-        this.dice == 6
-      ) {
-        this.startMove();
-      }
-    } else if ((this.status = "naPlanszy")) {
-      this.przesuniecie = this.currentPositionInArray + this.dice;
-      let expr = this.otherFilds.length - this.przesuniecie;
-      if (expr === 0) {
-        console.log(
-          `EXPR które nie działa przy 39 równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
-        );
-        this.przesuniecie = 0;
-      } else if (expr < 0) {
-        console.log(
-          `EXPR równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
-        );
-        this.przesuniecie = expr * -1;
-      }
-      if (
-        this.przesuniecie > this.lastElementInArray &&
-        this.currentPositionInArray < this.firstElementInArray
-      ) {
-        console.log(
-          `wchodzę na start na starcie mogę wykonać ${
-            this.przesuniecie - this.lastElementInArray - 1
-          }`
-        );
-        this.status = "wBazie";
-        this.przesuniecie = this.przesuniecie - this.lastElementInArray - 1;
+    switch (this.status) {
+      case "wDomku":
         if (
-          this.przesuniecie < 4 &&
-          this.lastPositions[this.przesuniecie].status == "spi"
+          this.dice == 1 ||
+          this.dice == 3 ||
+          this.dice == 2 ||
+          this.dice == 4 ||
+          this.dice == 5 ||
+          this.dice == 6
         ) {
           this.startMove();
         }
-      } else {
-        this.startMove();
-      }
-      console.log(
-        `przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy`
-      );
+        break;
+      case "wBazie":
+        // console.log(
+        //   `Jestem w bazie mój numer mojego właścieciela sekisaka koxaka sztosa totalnego to :  ${this.ownerNumber}`
+        // );
+        //! to zmień
+
+        this.currentPositionInArray = pozycjeKoncowe[
+          this.ownerNumber
+        ].findIndex(
+          (element) =>
+            JSON.stringify(element) == JSON.stringify([this.x, this.y])
+        );
+        break;
+      case "naPlanszy":
+        this.przesuniecie = this.currentPositionInArray + this.dice;
+        let expr = this.otherFilds.length - this.przesuniecie;
+        if (expr === 0) {
+          // console.log(
+          //   `EXPR które nie działa przy 39 równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
+          // );
+          this.przesuniecie = 0;
+        } else if (expr < 0) {
+          // console.log(
+          //   `EXPR równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
+          // );
+          this.przesuniecie = expr * -1;
+        }
+        // this.lastPositions.forEach((index) => index.setBase());
+        console.log(
+          this.przesuniecie > this.lastElementInArray &&
+            (this.currentPositionInArray < this.firstElementInArray ||
+              this.currentPositionInArray >= 36),
+          this.przesuniecie > this.lastElementInArray,
+          this.currentPositionInArray < this.firstElementInArray,
+          this.currentPositionInArray >= 36,
+          this.currentPositionInArray
+        );
+        //TODO DOPISZ WARUNEK AKTYWNYCH PIONKÓW ŻEBY MOŻNA WEJŚĆ DO BAZY BEZ NICZEGO
+        if (
+          this.przesuniecie > this.lastElementInArray &&
+          (this.currentPositionInArray < this.firstElementInArray ||
+            this.currentPositionInArray >= 36)
+        ) {
+          console.log(
+            `wchodzę na start na starcie mogę wykonać ${
+              this.przesuniecie - this.lastElementInArray - 1
+            }`
+          );
+          this.status = "wBazie";
+          this.przesuniecie = this.przesuniecie - this.lastElementInArray - 1;
+          console.log(this.lastPositions[this.przesuniecie].status);
+          console.log(this.lastPositions);
+          console.log(
+            this.przesuniecie < 4 &&
+              this.lastPositions[this.przesuniecie].status == "spi"
+          );
+          if (
+            this.przesuniecie < 4 &&
+            this.lastPositions[this.przesuniecie].status == "spi"
+          ) {
+            console.log("POwinnem sie");
+            console.log(this);
+            this.startMove();
+          }
+        } else {
+          this.startMove();
+        }
+        break;
+      default:
+        break;
     }
   }
   //* odpowiada za mruganie
@@ -203,7 +240,6 @@ export default class Field {
         break;
       }
       case "wBazie":
-        console.log("wysyłam go do bazy ");
         let nowyRuch = new serverOperation(null, null, config.newMove, null);
         nowyRuch.fetchData();
         nowyRuch.changeParams(
@@ -234,7 +270,6 @@ export default class Field {
         this.otherFilds[this.przesuniecie].element.style.filter = "invert(1)";
         break;
       case "wBazie":
-        console.log(this.lastPositions);
         this.lastPositions[this.przesuniecie].element.style.filter =
           "invert(1)";
         break;
@@ -244,7 +279,7 @@ export default class Field {
   //* obsługije wyjście myszki z pionka
   handelMouseOut = () => {
     switch (this.status) {
-      case "wDomu":
+      case "wDomku":
         this.element.style.cursor = "default";
         this.otherFilds[this.firstElementInArray].element.style.filter =
           "invert(0)";
