@@ -72,7 +72,6 @@ const userInGameOperations = {
         this.lastPlace == [] ||
         JSON.stringify(this.lastPlace) != JSON.stringify(v)
       ) {
-        console.log("renderuje");
         this.lastPlace = v;
         createGameBord.pawns = v;
         createGameBord.resize();
@@ -84,32 +83,50 @@ const userInGameOperations = {
     //pobierani informacji o kolejce
     let synch = new serverOperation(null, null, config.gameSynch, null);
     synch.fetchData().then((v) => {
-      //odpalam kostki
-      //nie robię tego w kółko
-      if (this.lastDice != v.dice || this.lastPLayer != v.movePlayer) {
-        // nie renderuje tego w nieskończoność -> odpowiednik watch w vue
-        //dodaje gracza w przypadku kolejki gdzie nie został wykonany ruch
-        this.lastDice = v.dice;
-        this.lastPLayer = v.movePlayer;
-        this.kosteczka.setDice(v.dice); // kostreczka wylosowana i odpalona
-        this.playerOperationArray.forEach((index) => {
-          index.enebleDice(
-            this.playerOperationArray[v.movePlayer].getNick,
-            v.dice
-          );
-          index.disablePawns();
-          if (v.dice != null) {
-            index.enablePawns(
+      if (v.win) {
+        //jeśli
+        document.querySelector(".fieldContainer").innerHTML = "";
+        document.querySelector(
+          ".fieldContainer"
+        ).innerText = `GRA ZAKOŃCZONA WYGRAŁ ${v.win.nickname}, zaraz wrócisz do rejestracji`;
+        document.querySelector(".fieldContainer").style.backgroundColor =
+          "black";
+        document.querySelector(
+          ".fieldContainer"
+        ).style.color = `rgb(${v.win.R},${v.win.G},${v.win.B})`;
+        setTimeout(() => {
+          console.log("BOOM END GM");
+          window.location.reload(true);
+        }, 5000);
+      } else {
+        if (this.lastDice != v.dice || this.lastPLayer != v.movePlayer) {
+          //odpalam kostki
+          //nie robię tego w kółko
+          // nie renderuje tego w nieskończoność -> odpowiednik watch w vue
+          //dodaje gracza w przypadku kolejki gdzie nie został wykonany ruch
+          this.lastDice = v.dice;
+          this.lastPLayer = v.movePlayer;
+          this.kosteczka.setDice(v.dice); // kostreczka wylosowana i odpalona
+          this.playerOperationArray.forEach((index) => {
+            index.enebleDice(
               this.playerOperationArray[v.movePlayer].getNick,
               v.dice
             );
-          } // jeśli kostka została już wylosowana
-          else {
-            // index.clearMove();
-          }
-        });
-        this.createPawns();
-      } else {
+            index.disablePawns();
+            if (v.dice != null) {
+              index.enablePawns(
+                this.playerOperationArray[v.movePlayer].getNick,
+                v.dice
+              );
+            } // jeśli kostka została już wylosowana
+            else {
+              // index.clearMove();
+            }
+          });
+          console.log(this.playerOperationArray);
+          this.createPawns();
+        } else {
+        }
       }
       //obliczam czas do nastepnego zapytania
       this.playerOperationArray[v.movePlayer].setTime(v.remainingTime);
@@ -117,7 +134,7 @@ const userInGameOperations = {
       if (nextRequest < 0) nextRequest = 0;
       if (nextRequest <= 0) nextRequest = 0;
       setTimeout(function () {
-        userInGameOperations.synchGame();
+        if (v.win == "") userInGameOperations.synchGame();
       }, 500);
     });
     if (this.lastPlace == []) this.lastPlace;

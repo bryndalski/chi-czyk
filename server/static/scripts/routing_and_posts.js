@@ -67,6 +67,7 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
     player.endPawnMove(req, pokojeAktualne);
     res.sendStatus(200);
   });
+
   //*POST SECTION
 
   app.post("/askForRoom", function (req, res) {
@@ -83,5 +84,8 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
   app.post("/newMove", function (req, res) {
     player.move(req, pokojeAktualne);
     res.sendStatus(200);
+  });
+  app.get("*", (req, res) => {
+    // res.sendFile()
   });
 };

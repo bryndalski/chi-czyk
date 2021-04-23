@@ -53,6 +53,9 @@ export default class Field {
   get getOwner() {
     return this.owner;
   }
+  getCords() {
+    return [this.x, this.y];
+  }
 
   //methods
   changeToPawn(inColor, owner, ownerNumber, currentPositionInArray) {
@@ -90,7 +93,6 @@ export default class Field {
       }
     });
     //?sprawdza czy pionek znajduje się w bazie  na ścieżce lub na końcu i nadaje mu status
-    // console.log("sprawdzam pionka");
     if (this.ownerNumber != null)
       if (
         JSON.stringify(pozycjeWRogach[this.ownerNumber]).includes(
@@ -113,11 +115,9 @@ export default class Field {
         this.status = "spi";
       }
     else this.status = "spi";
-    // console.log(this.status);
   }
   //?OPCJE DLA GRACZA
   enablePawn(dice) {
-    console.log(this.status);
     this.dice = dice;
     switch (this.status) {
       case "wDomku":
@@ -133,10 +133,8 @@ export default class Field {
         }
         break;
       case "wBazie":
-        // console.log(
-        //   `Jestem w bazie mój numer mojego właścieciela sekisaka koxaka sztosa totalnego to :  ${this.ownerNumber}`
-        // );
         //! to zmień
+        this.lastPositions.map((element) => element.setBase());
 
         this.currentPositionInArray = pozycjeKoncowe[
           this.ownerNumber
@@ -144,57 +142,66 @@ export default class Field {
           (element) =>
             JSON.stringify(element) == JSON.stringify([this.x, this.y])
         );
+        console.log(this.currentPositionInArray);
+        let pawnsCordArray = this.pawnsArray.map((element) => [
+          element.x,
+          element.y,
+        ]);
+        this.przesuniecie = this.currentPositionInArray + this.dice;
+
+        if (this.przesuniecie > 3) return; // jeśli przesunięcie jest większe nie ma sensu bawić się w dalszą zabawe
+        console.log(
+          JSON.stringify(pawnsCordArray),
+          JSON.stringify(this.lastPositions[this.przesuniecie].getCords),
+          JSON.stringify(pawnsCordArray).includes(
+            JSON.stringify(this.lastPositions[this.przesuniecie].getCords)
+          ),
+          this.dice,
+          this.przesuniecie,
+          this.lastPositions[this.przesuniecie],
+          this.lastPositions[this.przesuniecie].getCords()
+        );
+        if (
+          !JSON.stringify(pawnsCordArray).includes(
+            JSON.stringify(this.lastPositions[this.przesuniecie].getCords())
+          )
+        ) {
+          this.startMove();
+        }
+
         break;
       case "naPlanszy":
+        //TODO dopracuj przesunięcie doddaj to w try catch i będzie śmigać
         this.przesuniecie = this.currentPositionInArray + this.dice;
         let expr = this.otherFilds.length - this.przesuniecie;
         if (expr === 0) {
-          // console.log(
-          //   `EXPR które nie działa przy 39 równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
-          // );
           this.przesuniecie = 0;
         } else if (expr < 0) {
-          // console.log(
-          //   `EXPR równa się ${expr} -przesunięcie wynosi ${this.przesuniecie} na ${this.otherFilds.length} ilość w tablicy !!!`
-          // );
           this.przesuniecie = expr * -1;
         }
-        // this.lastPositions.forEach((index) => index.setBase());
-        console.log(
-          this.przesuniecie > this.lastElementInArray &&
-            (this.currentPositionInArray < this.firstElementInArray ||
-              this.currentPositionInArray >= 36),
-          this.przesuniecie > this.lastElementInArray,
-          this.currentPositionInArray < this.firstElementInArray,
-          this.currentPositionInArray >= 36,
-          this.currentPositionInArray
-        );
         //TODO DOPISZ WARUNEK AKTYWNYCH PIONKÓW ŻEBY MOŻNA WEJŚĆ DO BAZY BEZ NICZEGO
         if (
           this.przesuniecie > this.lastElementInArray &&
           (this.currentPositionInArray < this.firstElementInArray ||
             this.currentPositionInArray >= 36)
         ) {
-          console.log(
-            `wchodzę na start na starcie mogę wykonać ${
-              this.przesuniecie - this.lastElementInArray - 1
-            }`
-          );
           this.status = "wBazie";
           this.przesuniecie = this.przesuniecie - this.lastElementInArray - 1;
-          console.log(this.lastPositions[this.przesuniecie].status);
-          console.log(this.lastPositions);
-          console.log(
-            this.przesuniecie < 4 &&
-              this.lastPositions[this.przesuniecie].status == "spi"
-          );
           if (
             this.przesuniecie < 4 &&
-            this.lastPositions[this.przesuniecie].status == "spi"
+            this.lastPositions[this.przesuniecie].status == "wBazie"
           ) {
-            console.log("POwinnem sie");
-            console.log(this);
-            this.startMove();
+            let pawnsCordArray = this.pawnsArray.map((element) => [
+              element.x,
+              element.y,
+            ]);
+            if (
+              !JSON.stringify(pawnsCordArray).includes(
+                JSON.stringify(this.lastPositions[this.przesuniecie].getCords())
+              )
+            ) {
+              this.startMove();
+            }
           }
         } else {
           this.startMove();

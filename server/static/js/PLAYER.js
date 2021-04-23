@@ -1,5 +1,9 @@
 import Dice from "./dice.js";
 
+import { serverOperation } from "/js/XHHTP_CLASS.js";
+
+import { config } from "/config/config.js";
+
 export default class Player {
   constructor(nickname, color, connectedDiv, timer, button, gameOwner) {
     this.gameOwner = gameOwner; // kto gra => na aktualnej przeglądarce
@@ -72,8 +76,11 @@ export default class Player {
       this.nickname == this.gameOwner &&
       diceValue != null
     ) {
-      console.log("SIEMA");
       this.ownedPawns.forEach((index) => index.enablePawn(diceValue));
+      let statusy = this.ownedPawns.map((index) => index.active);
+      if (!JSON.stringify(statusy).includes("true")) {
+        new serverOperation(null, null, config.newMove, null).fetchData();
+      }
     }
   }
   //gasi pionki

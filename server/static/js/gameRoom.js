@@ -120,6 +120,7 @@ const createGameBord = {
     //*dodaje każdemu pionkowi informacje o innych ponieważ pracuje tylko na pionkach i fomruje bazy
     let licznkik = -1;
     this.assignedPawns.forEach((index) => index.setBase());
+    console.log(this.lastFil);
     this.assignedPawns.forEach((index, counter) => {
       if (counter % 4 == 0) licznkik++;
       index.setOutherFilds(this.gamePathArray);
@@ -133,22 +134,24 @@ const createGameBord = {
     pozycjeKoncowe.forEach((elem, counter) => {
       this.lastFil[counter] = [];
       elem.forEach((index) => {
-        this.lastFil[counter].push(
-          new Field(
-            index[0],
-            index[1],
-            this.drawFiled(
-              this.canvasSize.height * (index[0] / 100), //TODO zmień na x
-              this.canvasSize.height * (index[1] / 100), //TODO zmień na y
-              this.canvasSize.height * (6 / 100),
-              "rgb(0,0,0,0)",
-              "rgb(0,0,0,0)",
-              this.users[counter] == undefined
-                ? "red"
-                : `rgb(${this.users[counter].R},${this.users[counter].G},${this.users[counter].B})`
-            )
+        let pole = new Field(
+          index[0],
+          index[1],
+          this.drawFiled(
+            this.canvasSize.height * (index[0] / 100), //TODO zmień na x
+            this.canvasSize.height * (index[1] / 100), //TODO zmień na y
+            this.canvasSize.height * (6 / 100),
+            "rgb(0,0,0,0)",
+            "rgb(0,0,0,0)",
+            this.users[counter] == undefined
+              ? "red"
+              : `rgb(${this.users[counter].R},${this.users[counter].G},${this.users[counter].B})`
           )
         );
+        pole.ownerNumber = counter;
+        pole.setBase();
+        console.log(pole.status, pole.ownerNumber);
+        this.lastFil[counter].push(pole);
       });
     });
     //* pozycje na rogach => czyste bez możliwości manipulacji pionek znajduje się fizycznie nad nimi

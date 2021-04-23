@@ -2,7 +2,6 @@
 
 const { json } = require("body-parser");
 const { response } = require("express");
-const e = require("express");
 const { from } = require("responselike");
 const wspolrzedne = require("./wspolrzedne");
 
@@ -62,12 +61,35 @@ module.exports = {
   async handleGame(req, res, database) {
     //sprawdzam czy synchronizacja została wymuszona
     this.readDB(req, database).then((v) => {
+      //? wyszukuję czy w tablicy znajdują się podane koordynaty
+      let wyniki = [];
+      v.pawnPositions.forEach((index, counter) => {
+        //sprawdzam po każdym  elemencie w dużej
+        wyniki[counter] = [];
+        wyniki[counter] = index.map((element) =>
+          JSON.stringify(wspolrzedne.pozycjeKoncowe[counter]).includes(
+            JSON.stringify(element)
+          )
+        );
+      });
+      let zwyciezca = "";
+      wyniki.forEach((element, counter) => {
+        if (
+          JSON.stringify(element).includes(
+            JSON.stringify([true, true, true, true])
+          )
+        ) {
+          zwyciezca = v.players[counter];
+        }
+      });
       let wysyłam = {
         remainingTime: v.remainingTime / 1000, // czas w ludzkim formacie
         movePlayer: v.player, // rozgrywający
         reqSendTime: req.session.incoming, //do synchronizacji
         dice: v.dice, // wynik kostki
+        win: zwyciezca,
       };
+      req.session.destroy();
       res.json(wysyłam);
     });
   },
@@ -203,7 +225,6 @@ module.exports = {
       }
     );
   },
-
   //#######################____Zarządzanie odbiorem ruchu z bazy danych
   async move(req, database) {
     let bazaDanych = await this.readDB(req, database);
