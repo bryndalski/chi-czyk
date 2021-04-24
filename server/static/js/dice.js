@@ -15,7 +15,7 @@ class Dice {
 
   throwDice() {
     let kosteczka = new serverOperation(null, null, config.dice, null);
-    kosteczka.fetchData()
+    kosteczka.fetchData();
   }
   clearDice() {
     this.diceContainer.src = "/images/question.svg";
@@ -26,12 +26,10 @@ class Dice {
       this.diceContainer.src = `/images/dice-${value}.svg`;
       if (this.letMeTalk) {
         //TODO odkomentuj
-        // let utterance = new SpeechSynthesisUtterance(
-        //   `Kostka została wylosowana. Liczba oczek wynosi ${value}`
-        // );
-        // this.letMeTalk = false;
-        // utterance.lang = "pl-PL";
-        // this.syntezatorek.speak(utterance);
+        let utterance = new SpeechSynthesisUtterance(` ${value}`);
+        this.letMeTalk = false;
+        utterance.lang = "pl-PL";
+        this.syntezatorek.speak(utterance);
       }
     } else this.clearDice();
   }

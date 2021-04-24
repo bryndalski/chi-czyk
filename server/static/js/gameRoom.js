@@ -120,7 +120,7 @@ const createGameBord = {
     //*dodaje każdemu pionkowi informacje o innych ponieważ pracuje tylko na pionkach i fomruje bazy
     let licznkik = -1;
     this.assignedPawns.forEach((index) => index.setBase());
-    console.log(this.lastFil);
+
     this.assignedPawns.forEach((index, counter) => {
       if (counter % 4 == 0) licznkik++;
       index.setOutherFilds(this.gamePathArray);
@@ -150,7 +150,6 @@ const createGameBord = {
         );
         pole.ownerNumber = counter;
         pole.setBase();
-        console.log(pole.status, pole.ownerNumber);
         this.lastFil[counter].push(pole);
       });
     });

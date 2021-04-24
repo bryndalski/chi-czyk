@@ -95,7 +95,6 @@ const userInGameOperations = {
           ".fieldContainer"
         ).style.color = `rgb(${v.win.R},${v.win.G},${v.win.B})`;
         setTimeout(() => {
-          console.log("BOOM END GM");
           window.location.reload(true);
         }, 5000);
       } else {
@@ -123,7 +122,6 @@ const userInGameOperations = {
               // index.clearMove();
             }
           });
-          console.log(this.playerOperationArray);
           this.createPawns();
         } else {
         }

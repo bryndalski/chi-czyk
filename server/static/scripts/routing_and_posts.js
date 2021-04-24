@@ -85,7 +85,5 @@ module.exports = function (app, path, dirname, pokojeAktualne) {
     player.move(req, pokojeAktualne);
     res.sendStatus(200);
   });
-  app.get("*", (req, res) => {
-    // res.sendFile()
-  });
+  app.get("*", (req, res) => res.redirect("/"));
 };

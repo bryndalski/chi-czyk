@@ -7,7 +7,6 @@ function wantToPlay(req, res, pokojeAktualne) {
                 whoWantsToPlay: req.session.whoAmI.nickname
             }
         }, {}, function (data) {
-            // console.log(data);           //TODO czy potrzebne
         });
     } else {
         pokojeAktualne.update({
@@ -17,7 +16,6 @@ function wantToPlay(req, res, pokojeAktualne) {
                 whoWantsToPlay: req.session.whoAmI.nickname
             }
         }, {}, function (er, data) {
-            // console.log(data);       //TODO czy pootrzebne 
         });
     }
     pokojeAktualne.persistence.compactDatafile() //czyści DB 

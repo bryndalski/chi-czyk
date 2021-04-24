@@ -121,14 +121,7 @@ export default class Field {
     this.dice = dice;
     switch (this.status) {
       case "wDomku":
-        if (
-          this.dice == 1 ||
-          this.dice == 3 ||
-          this.dice == 2 ||
-          this.dice == 4 ||
-          this.dice == 5 ||
-          this.dice == 6
-        ) {
+        if (this.dice == 1 || this.dice == 6) {
           this.startMove();
         }
         break;
@@ -142,7 +135,6 @@ export default class Field {
           (element) =>
             JSON.stringify(element) == JSON.stringify([this.x, this.y])
         );
-        console.log(this.currentPositionInArray);
         let pawnsCordArray = this.pawnsArray.map((element) => [
           element.x,
           element.y,
@@ -150,17 +142,6 @@ export default class Field {
         this.przesuniecie = this.currentPositionInArray + this.dice;
 
         if (this.przesuniecie > 3) return; // jeśli przesunięcie jest większe nie ma sensu bawić się w dalszą zabawe
-        console.log(
-          JSON.stringify(pawnsCordArray),
-          JSON.stringify(this.lastPositions[this.przesuniecie].getCords),
-          JSON.stringify(pawnsCordArray).includes(
-            JSON.stringify(this.lastPositions[this.przesuniecie].getCords)
-          ),
-          this.dice,
-          this.przesuniecie,
-          this.lastPositions[this.przesuniecie],
-          this.lastPositions[this.przesuniecie].getCords()
-        );
         if (
           !JSON.stringify(pawnsCordArray).includes(
             JSON.stringify(this.lastPositions[this.przesuniecie].getCords())

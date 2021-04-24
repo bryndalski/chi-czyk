@@ -89,7 +89,7 @@ module.exports = {
         dice: v.dice, // wynik kostki
         win: zwyciezca,
       };
-      req.session.destroy();
+      if (zwyciezca != "") req.session.destroy();
       res.json(wysyłam);
     });
   },
