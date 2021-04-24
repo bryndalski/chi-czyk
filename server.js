@@ -41,4 +41,4 @@ require("./static/scripts/routing_and_posts")(
 
 //!!!end of reqirements
 
-app.listen(PORT, () => console.log(`Serwer zasuwa na PORCIE :  ${port}!`.red));
+app.listen(PORT, () => console.log(`Serwer zasuwa na PORCIE :  ${PORT}!`.red));
