@@ -4,7 +4,7 @@ const app = express();
 const dataBase = require("nedb");
 const bodyParser = require("body-parser");
 const session = require("express-session");
-const port = process.env.port || 5500;
+const PORT = process.env.PORT || 5500;
 //*app use && DB
 app.use(express.static(__dirname + "/static"));
 app.use(
@@ -41,4 +41,4 @@ require("./static/scripts/routing_and_posts")(
 
 //!!!end of reqirements
 
-app.listen(port, () => console.log(`Serwer zasuwa na PORCIE :  ${port}!`.red));
+app.listen(PORT, () => console.log(`Serwer zasuwa na PORCIE :  ${port}!`.red));
